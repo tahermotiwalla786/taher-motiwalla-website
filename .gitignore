@@ -1,0 +1,11 @@
+.DS_Store
+
+# Source design asset folders (images are already base64-encoded in the HTML files)
+Heatmaps/
+Offer Redesign/
+Onboarding /
+Scheduling/
+Tasks/
+hero images/
+shift tracker assets/
+hd *.png
