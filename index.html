@@ -437,8 +437,13 @@ button { font-family: var(--mono); }
     padding: 28px 20px 0;
   }
   #m-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
     padding: 0 20px 20px;
+    overflow-y: auto;
+  }
+  .grid-tile {
+    min-height: 220px;
   }
   #m-list {
     padding: 0 20px 20px;
