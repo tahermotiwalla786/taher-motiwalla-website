@@ -420,6 +420,39 @@ button { font-family: var(--mono); }
 .contact-text a:hover { text-decoration-color: var(--fg); }
 
 
+@media (max-width: 640px) {
+  .nav-primary {
+    padding: 20px 20px 28px;
+  }
+  .nav-sub {
+    padding: 14px 20px 20px;
+  }
+  .sub-label { display: none; }
+  .sub-center {
+    position: static;
+    transform: none;
+    margin-left: auto;
+  }
+  #v-landing {
+    padding: 28px 20px 0;
+  }
+  #m-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    padding: 0 20px 20px;
+    overflow-y: auto;
+  }
+  .grid-tile {
+    min-height: 220px;
+  }
+  #m-list {
+    padding: 0 20px 20px;
+  }
+  #v-contact {
+    padding: 10vh 20px 0;
+  }
+}
+
 </style>
 </head>
 <body>
