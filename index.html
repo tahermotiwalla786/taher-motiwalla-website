@@ -13,8 +13,8 @@
 /* ── TOKENS ─────────────────────────────── */
 :root {
     --fg:    rgba(235,232,228,1);
-    --fg-2:  rgba(235,232,228,0.45);
-    --fg-3:  rgba(235,232,228,0.18);
+    --fg-2:  rgba(235,232,228,0.62);
+    --fg-3:  rgba(235,232,228,0.35);
     --fg-4:  rgba(235,232,228,0.07);
     --mono: 'JetBrains Mono', monospace;
     --nav-h: 52px;
@@ -115,16 +115,16 @@ button { font-family: var(--mono); }
 .nav-logo:hover { color: var(--fg-2); }
 /* WORK and CONTACT right side */
 .nav-center-link {
-    color: var(--fg);
+    color: var(--fg-2);
     margin-left: 40px;
 }
-.nav-center-link:hover { color: var(--fg-2); }
+.nav-center-link:hover { color: var(--fg); }
 .nav-center-link.active { color: var(--fg); }
 .nav-right-link {
-    color: var(--fg);
+    color: var(--fg-2);
     margin-left: 40px;
 }
-.nav-right-link:hover { color: var(--fg-2); }
+.nav-right-link:hover { color: var(--fg); }
 .nav-right-link.active { color: var(--fg); }
 
 /* ── WORK SUB-NAV ───────────────────────── */
@@ -324,7 +324,7 @@ button { font-family: var(--mono); }
 }
 .grid-tile-num {
     font-size: 10px; letter-spacing: 0.14em;
-    color: rgba(235,232,228,0.45);
+    color: rgba(235,232,228,0.62);
 }
 .grid-tile-name {
     font-size: 13px; letter-spacing: 0.10em;
@@ -332,7 +332,7 @@ button { font-family: var(--mono); }
 }
 .grid-tile-year {
     font-size: 10px; letter-spacing: 0.12em;
-    color: rgba(235,232,228,0.45);
+    color: rgba(235,232,228,0.62);
 }
 
 /* ── WORK — LIST MODE ───────────────────── */
@@ -449,6 +449,7 @@ button { font-family: var(--mono); }
   #m-grid {
     grid-template-columns: 1fr;
     grid-template-rows: none;
+    gap: 12px;
     padding: 0 20px 20px;
     overflow-y: auto;
   }
@@ -513,7 +514,7 @@ button { font-family: var(--mono); }
                 <p>Currently: Grubhub</p>
                 <p>Previously: Made in Tandem, Optimity Advisors</p>
                 <div class="gap"></div>
-                <p>Get in touch at <a href="mailto:tahermotiwalla@gmail.com">tahermotiwalla@gmail.com</a> or <a href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener">LinkedIn</a></p>
+                <p>Get in touch at <a href="mailto:tahermotiwalla@gmail.com">tahermotiwalla@gmail.com</a> or on <a href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener">LinkedIn</a></p>
             </div>
         </div>
 
