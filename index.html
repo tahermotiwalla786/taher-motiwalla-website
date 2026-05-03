@@ -100,8 +100,9 @@ button { font-family: var(--mono); }
     padding: 32px 40px 48px;
 }
 .nav-primary a, .nav-primary button {
-    font-size: 13px;
-    letter-spacing: 0.12em;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
     background: none;
     border: none;
     padding: 0;
@@ -143,8 +144,9 @@ button { font-family: var(--mono); }
     pointer-events: auto;
 }
 .sub-label {
-    font-size: 13px;
-    letter-spacing: 0.12em;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.10em;
     color: var(--fg-3);
     cursor: default;
 }
@@ -160,8 +162,9 @@ button { font-family: var(--mono); }
 /* Project name pill (slide mode) - hidden, name shown below image */
 /* Mode toggle buttons */
 .mode-toggle {
-    font-size: 13px;
-    letter-spacing: 0.12em;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
     color: var(--fg-2);
     background: none;
     border: none;
@@ -205,10 +208,10 @@ button { font-family: var(--mono); }
     padding: 48px 40px 0;
 }
 .landing-bio p {
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1.8;
     letter-spacing: 0.10em;
-    color: rgba(235,232,228,0.65);
+    color: var(--fg-2);
     margin-bottom: 4px;
 }
 .landing-bio p.primary { color: var(--fg); }
@@ -323,16 +326,16 @@ button { font-family: var(--mono); }
     gap: 4px;
 }
 .grid-tile-num {
-    font-size: 10px; letter-spacing: 0.14em;
-    color: rgba(235,232,228,0.62);
+    font-size: 14px; letter-spacing: 0.10em; font-weight: 500;
+    color: var(--fg-2);
 }
 .grid-tile-name {
-    font-size: 13px; letter-spacing: 0.10em;
+    font-size: 14px; letter-spacing: 0.08em; font-weight: 500;
     text-transform: uppercase; color: var(--fg);
 }
 .grid-tile-year {
-    font-size: 10px; letter-spacing: 0.12em;
-    color: rgba(235,232,228,0.62);
+    font-size: 14px; letter-spacing: 0.08em; font-weight: 500;
+    color: var(--fg-2);
 }
 
 /* ── WORK — LIST MODE ───────────────────── */
@@ -369,15 +372,16 @@ button { font-family: var(--mono); }
 .list-item.on { background: var(--fg); }
 
 .list-num {
-    font-size: 13px;
-    letter-spacing: 0.08em;
+    font-size: 14px;
+    letter-spacing: 0.06em;
     color: var(--fg-2);
     flex-shrink: 0;
     width: 40px;
 }
 .list-name {
-    font-size: 13px;
-    letter-spacing: 0.08em;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
     color: var(--fg);
     text-align: center;
     flex: 1;
@@ -387,8 +391,8 @@ button { font-family: var(--mono); }
 .list-item.on .list-name,
 .list-item.on .list-yr { color: #0C0A10; }
 .list-yr {
-    font-size: 13px;
-    letter-spacing: 0.08em;
+    font-size: 14px;
+    letter-spacing: 0.06em;
     color: var(--fg-2);
     text-align: right;
     flex-shrink: 0;
@@ -403,7 +407,7 @@ button { font-family: var(--mono); }
     padding: 22vh 40px 0;
 }
 .contact-text p {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.9;
     letter-spacing: 0.02em;
     color: var(--fg-2);
@@ -472,11 +476,103 @@ button { font-family: var(--mono); }
     gap: 10px;
 }
 .grid-tile-app {
-    font-size: 10px;
-    letter-spacing: 0.10em;
-    color: rgba(235,232,228,0.35);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--fg-2);
     text-transform: uppercase;
 }
+
+/* ── PASSWORD GATE ──────────────────────── */
+#v-gate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gate-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    width: 320px;
+}
+.gate-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+}
+.gate-field-row {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+}
+.gate-field {
+    flex: 1;
+    border-bottom: 1px solid var(--fg-3);
+    transition: border-color 0.2s;
+}
+.gate-field:focus-within { border-color: var(--fg-2); }
+.gate-field.error { border-color: rgba(220,80,80,0.8); }
+.gate-input {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    padding: 4px 0 10px;
+    outline: none;
+    caret-color: var(--fg);
+}
+.gate-input::placeholder { color: var(--fg-3); }
+.gate-submit {
+    background: none;
+    border: none;
+    color: var(--fg-3);
+    padding: 0 0 10px 4px;
+    cursor: pointer;
+    align-self: end;
+    transition: color 0.15s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+.gate-submit svg { width: 18px; height: 18px; transition: transform 0.15s; }
+.gate-submit:hover { color: var(--fg); }
+.gate-submit:hover svg { transform: translateX(3px); }
+.gate-hint {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--fg-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.gate-hint kbd {
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--fg-2);
+    background: rgba(235,232,228,0.04);
+    border: 1px solid var(--fg-3);
+    border-radius: 4px;
+    padding: 1px 7px;
+}
+.gate-error {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: rgba(220,80,80,0.8);
+    opacity: 0;
+    transition: opacity 0.2s;
+    height: 18px;
+}
+.gate-error.show { opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -617,6 +713,26 @@ button { font-family: var(--mono); }
 
         </div><!-- /#v-work -->
 
+
+        <!-- PASSWORD GATE -->
+        <div class="view" id="v-gate">
+            <div class="gate-wrap">
+                <div class="gate-label">Password required</div>
+                <div class="gate-field-row">
+                    <div class="gate-field" id="gate-input-row">
+                        <input class="gate-input" id="gate-input" type="password" placeholder="Enter password" autocomplete="off" spellcheck="false" enterkeyhint="go" />
+                    </div>
+                    <button class="gate-submit" id="gate-submit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M4 12h15M13 6l6 6-6 6" stroke-linecap="square"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="gate-hint">Press <kbd>&#9166;</kbd> to continue</div>
+                <div class="gate-error" id="gate-error">Incorrect password</div>
+            </div>
+        </div>
+
         <!-- CONTACT -->
         <div class="view" id="v-contact">
             <div class="contact-text">
@@ -660,8 +776,55 @@ function goView(id) {
     activeView = id;
 }
 
+/* ── PASSWORD GATE ──────────────────────── */
+const GATE_PW = 'pixel';
+
+function tryWork() {
+    if (sessionStorage.getItem('pw_ok') === '1') {
+        goView('work');
+    } else {
+        goView('gate');
+        setTimeout(() => {
+            const inp = document.getElementById('gate-input');
+            inp.value = '';
+            inp.focus();
+        }, 50);
+    }
+}
+
 document.querySelectorAll('[data-go]').forEach(el => {
-    el.addEventListener('click', () => goView(el.dataset.go));
+    el.addEventListener('click', () => {
+        if (el.dataset.go === 'work') { tryWork(); }
+        else { goView(el.dataset.go); }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('gate-input');
+    const err = document.getElementById('gate-error');
+    const row = document.getElementById('gate-input-row');
+
+    const submit = document.getElementById('gate-submit');
+    function checkPassword() {
+        if (inp.value.trim().toLowerCase() === GATE_PW) {
+            sessionStorage.setItem('pw_ok', '1');
+            goView('work');
+        } else {
+            row.classList.add('error');
+            err.classList.add('show');
+            inp.value = '';
+        }
+    }
+    submit.addEventListener('click', checkPassword);
+
+    inp.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') {
+            row.classList.remove('error');
+            err.classList.remove('show');
+            return;
+        }
+        checkPassword();
+    });
 });
 
 /* ── MODE SWITCHING ─────────────────────── */
@@ -743,7 +906,7 @@ goMode('grid');
 
 // If arriving from a detail page via #work hash, jump straight to work view
 if (window.location.hash === '#work') {
-    goView('work');
+    tryWork();
     history.replaceState(null, '', window.location.pathname);
 }
 
