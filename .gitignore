@@ -9,3 +9,10 @@ Tasks/
 hero images/
 shift tracker assets/
 hd *.png
+
+# Local-only: raw design exports, backups, tooling
+Portfolio update assets/
+Project Screens/
+BACKUP_*.tar.gz
+.write-test
+.claude/

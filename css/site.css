@@ -1,0 +1,204 @@
+/* ── TOKENS ─────────────────────────────── */
+:root {
+    --bg:        #0b0500;
+    --surface:   #231b16;
+    --surface-2: #322822;
+    --fg:        #f9e9df;
+    --fg-muted:  rgba(249,233,223,0.5);
+    --fg-faint:  rgba(249,233,223,0.1);
+    --line:      #f9e9df;
+    --toggle-bg: #231b16;
+    --accent:    #ff8d58;
+    --accent-bg: rgba(233,47,14,0.25);
+    --phone:     #d9d9d9;
+    --scrim:     rgba(0,0,0,0.2);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --spring: cubic-bezier(.34,1.56,.64,1);
+    color-scheme: dark;
+}
+/* Light mode — first pass, not yet in Figma ("pick the light mode colors") */
+:root[data-theme="light"] {
+    --bg:        #f9e9df;
+    --surface:   #efd8ca;
+    --surface-2: #e5c8b8;
+    --fg:        #0b0500;
+    --fg-muted:  rgba(11,5,0,0.5);
+    --fg-faint:  rgba(11,5,0,0.07);
+    --line:      #0b0500;
+    --toggle-bg: #dcc3b6;
+    --accent:    #c4410d;
+    --accent-bg: rgba(233,47,14,0.14);
+    --phone:     #cbb8ad;
+    --scrim:     rgba(249,233,223,0.25);
+    color-scheme: light;
+}
+
+/* ── RESET ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--fg);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color .4s var(--ease), color .4s var(--ease);
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input { font: inherit; color: inherit; }
+img, video { display: block; }
+:focus-visible { outline: 1px dashed var(--fg); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── ICONS (SVGs from Figma, tinted via mask) ── */
+.i {
+    display: inline-block;
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    background: currentColor;
+    -webkit-mask: var(--src) center / contain no-repeat;
+            mask: var(--src) center / contain no-repeat;
+}
+.i-email   { --src: url(../assets/icons/email.svg); }
+.i-linkedin{ --src: url(../assets/icons/linkedin.svg); }
+.i-moon    { --src: url(../assets/icons/moon.svg); }
+.i-sun     { --src: url(../assets/icons/sun.svg); }
+.i-up      { --src: url(../assets/icons/chevron-up.svg); }
+.i-down    { --src: url(../assets/icons/chevron-down.svg); }
+.i-heart   { --src: url(../assets/icons/heart.svg); }
+.i-heart-fill { --src: url(../assets/icons/heart-fill.svg); }
+.i-close   { --src: url(../assets/icons/close.svg); }
+.i-search  { --src: url(../assets/icons/search.svg); }
+.i-back    { --src: url(../assets/icons/arrow-left.svg); }
+.i-expand  { --src: url(../assets/icons/expand.svg); }
+.i-return  { --src: url(../assets/icons/return.svg); }
+
+.circle-btn {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--toggle-bg);
+    color: var(--fg);
+    transition: transform .25s var(--spring), background-color .4s var(--ease);
+    text-decoration: none;
+}
+.circle-btn:hover { transform: scale(1.08); }
+.circle-btn:active { transform: scale(.94); }
+.circle-btn .i-linkedin { width: 28.8px; height: 28.8px; }
+
+/* Theme toggle: icon swaps with a little spin */
+.theme-toggle .i { transition: transform .5s var(--spring), opacity .2s; }
+.theme-toggle .i-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .i-sun { display: inline-block; }
+:root[data-theme="light"] .theme-toggle .i-moon { display: none; }
+.theme-toggle.spin .i { transform: rotate(180deg) scale(.6); opacity: 0; }
+
+.pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-weight: 700; font-size: 16px;
+    text-transform: lowercase;
+    white-space: nowrap;
+    transition: transform .2s var(--spring), background-color .4s var(--ease);
+}
+.pill:hover { transform: translateY(-1px); }
+.pill .i { width: 24px; height: 24px; }
+
+/* ── PHONE (video / image / placeholder) ── */
+.phone {
+    position: relative;
+    aspect-ratio: 306 / 620;
+    border-radius: 11.76% / 5.8%;
+    background: var(--phone);
+    overflow: hidden;
+    transition: background-color .4s var(--ease);
+}
+.phone > video, .phone > img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+.phone-ph {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    padding: 16px;
+    text-align: center;
+    font-size: 12px; font-weight: 300;
+    color: rgba(11,5,0,.45);
+    text-transform: lowercase;
+}
+
+/* ── KEYBOARD SHORTCUTS OVERLAY ── */
+.kbd {
+    display: inline-grid; place-items: center;
+    min-width: 22px; height: 22px; padding: 0 6px;
+    border: 1px solid var(--fg-muted);
+    border-radius: 4px;
+    font-size: 12px;
+}
+.overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: grid; place-items: center;
+    padding: 16px;
+    background: var(--scrim);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s var(--ease);
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+.sheet {
+    width: min(516px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    transform: translateY(16px) scale(.98);
+    transition: transform .35s var(--spring);
+}
+.overlay.open .sheet { transform: none; }
+.sheet-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 32px;
+    border-bottom: 1px solid var(--line);
+    font-size: 24px; text-transform: uppercase;
+}
+.shortcut-list { padding: 24px 32px 32px; display: grid; gap: 14px; font-size: 14px; }
+.shortcut-list div { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.shortcut-list span:first-child { display: flex; gap: 6px; }
+
+.toast {
+    position: fixed; left: 50%; bottom: 32px; z-index: 120;
+    transform: translate(-50%, 20px);
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--fg); color: var(--bg);
+    font-size: 14px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .35s var(--spring);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── PASSWORD GATE ── */
+.gate { display: grid; gap: 16px; padding: 32px; }
+.gate p { font-size: 14px; color: var(--fg-muted); }
+.gate-row { display: flex; border: 1px solid var(--line); }
+.gate-row.error { animation: shake .4s; border-color: #e0503c; }
+.gate-row input { flex: 1; min-width: 0; padding: 16px; background: none; border: 0; outline: 0; }
+.gate-row button { padding: 0 20px; border-left: 1px solid var(--line); text-transform: uppercase; }
+@keyframes shake {
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+/* used to skip intro transitions on deep links */
+.no-anim *, .no-anim *::before, .no-anim *::after { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

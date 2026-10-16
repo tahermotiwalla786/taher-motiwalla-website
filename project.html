@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L690CL5VLW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L690CL5VLW');
+    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project — Taher Motiwalla</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/project.css">
+</head>
+<body class="project locked">
+
+<header class="topnav">
+    <nav><a href="index.html">Home</a><a href="index.html#projects">Projects</a></nav>
+    <div class="topnav-r">
+        <a class="circle-btn" href="mailto:tahermotiwalla@gmail.com" aria-label="Email"><span class="i i-email"></span></a>
+        <a class="circle-btn" href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener" aria-label="LinkedIn"><span class="i i-linkedin"></span></a>
+        <button class="circle-btn theme-toggle" aria-label="Switch to light mode"><span class="i i-moon"></span><span class="i i-sun"></span></button>
+    </div>
+</header>
+
+<main class="proj">
+    <section class="stage">
+        <div class="stage-media">
+            <img class="stage-bg" src="assets/img/project-bg.png" alt="">
+            <a class="backbar" href="index.html#projects"><span class="back-ic"><span class="i i-back"></span></span>Back to projects</a>
+            <div class="phones" id="phones"></div>
+        </div>
+        <div class="pagenav">
+            <p class="hint" id="hint"><span class="kbd">↑</span><span class="kbd">↓</span> to flip · <span class="kbd">?</span> shortcuts</p>
+            <div class="pagenav-c">
+                <button id="prev" aria-label="Previous page"><span class="i i-up"></span></button>
+                <button class="like" id="like" aria-pressed="false" aria-label="Like"><span class="heart"><span class="i i-heart"></span><span class="i i-heart-fill"></span></span><span class="count" id="likes">00</span></button>
+                <button id="next" aria-label="Next page"><span class="i i-down"></span></button>
+            </div>
+            <p class="counter" id="counter">1/7</p>
+        </div>
+    </section>
+
+    <aside class="side">
+        <button class="projmenu" id="projmenu" aria-haspopup="dialog">
+            <img class="logo" id="logo" src="assets/img/gh-logo.png" alt="">
+            <span class="ptitle" id="ptitle"></span>
+            <span class="i i-down"></span>
+        </button>
+        <div class="side-body" id="sidebody"></div>
+        <div class="side-foot" id="sidefoot">
+            <button class="btn" id="comment-open">Leave a comment</button>
+            <form class="comment" id="comment">
+                <label class="comment-field">
+                    <span class="ts" id="ts">00:00</span>
+                    <input id="comment-input" placeholder="Add a comment" autocomplete="off" aria-label="Add a comment">
+                </label>
+                <div class="comment-btns">
+                    <button type="button" class="btn" id="comment-cancel">Cancel</button>
+                    <button type="submit" class="btn solid">Send</button>
+                </div>
+            </form>
+        </div>
+    </aside>
+</main>
+
+<div class="overlay overlay-right" id="menu" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-label="Projects">
+        <div class="sheet-head">Projects <button data-close aria-label="Close"><span class="i i-close"></span></button></div>
+        <div class="plist" id="plist"></div>
+        <label class="psearch"><span class="i i-search"></span><input id="psearch" placeholder="search...." autocomplete="off" aria-label="Search projects"></label>
+    </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/project.js"></script>
+</body>
+</html>
