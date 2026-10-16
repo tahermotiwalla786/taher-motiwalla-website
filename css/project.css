@@ -59,42 +59,76 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
 .phones { position: absolute; inset: var(--bar) 0 0; z-index: 2; }
 .slot {
     position: absolute; left: 50%; top: 50%;
-    height: min(780px, calc(100% - 40px));
+    height: min(780px, calc(100% - 96px)); /* room below for the scrubber */
     transform: translate(-50%, -50%);
+    --p: 0;
+    --lift: cubic-bezier(.34, 1.4, .64, 1);
 }
-.slot .phone { height: 100%; border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,.35); }
+.slot .phone {
+    height: 100%; border-radius: 36px;
+    box-shadow: 0 30px 60px rgba(0,0,0,.35);
+    transition: transform .55s var(--lift);
+}
 .slot .phone video { cursor: pointer; }
-.playflash {
-    position: absolute; left: 50%; top: 50%; z-index: 3;
-    width: 64px; height: 64px; margin: -32px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    background: rgba(0,0,0,.5); color: #fff; font-size: 22px;
-    opacity: 0; pointer-events: none;
-}
-.playflash.go { animation: flash .6s var(--ease); }
-@keyframes flash { 0% { opacity: 1; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.3); } }
+.slot.scrub-on .phone { transform: translateY(-18px); }
 
-.scrub {
-    -webkit-appearance: none; appearance: none;
-    position: absolute; left: 22px; right: 22px; bottom: 14px; z-index: 3;
-    height: 16px; background: transparent; cursor: pointer;
-    opacity: 0; transform: translateY(14px);
+/* play / pause — bottom-right of the phone */
+.pp {
+    position: absolute; right: 14px; bottom: 14px; z-index: 3;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; transform: scale(.6);
     pointer-events: none;
-    transition: opacity .25s var(--ease), transform .4s var(--spring);
+    transition: opacity .25s var(--ease), transform .45s var(--lift), background-color .2s;
 }
-.phone::after { /* soft shade so the scrubber reads on light screens */
-    content: ''; position: absolute; inset: auto 0 0; height: 72px; z-index: 2;
-    background: linear-gradient(transparent, rgba(0,0,0,.45));
-    opacity: 0; transition: opacity .25s; pointer-events: none;
+.pp:hover { background: rgba(0,0,0,.6); }
+.slot.scrub-on .pp { opacity: 1; transform: none; pointer-events: auto; transition-delay: .08s; }
+
+/* scrubber — sits 24px below the phone (Figma: 4px track, 12px knob) */
+.scrubber {
+    position: absolute; left: 0; right: 0;
+    top: calc(100% + 24px - 18px - 10px);
+    height: 32px;
+    display: flex; align-items: center;
+    cursor: pointer; touch-action: none;
+    opacity: 0; transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity .3s var(--ease), transform .55s var(--lift);
 }
-.phone.scrub-on .scrub, .phone.paused .scrub, .scrub:focus-visible { opacity: 1; transform: none; pointer-events: auto; }
-.phone.scrub-on::after, .phone.paused::after { opacity: 1; }
-.scrub::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: linear-gradient(#fff, #fff) 0 / var(--p, 0%) 100% no-repeat, rgba(255,255,255,.35); }
-.scrub::-moz-range-track { height: 3px; border-radius: 3px; background: rgba(255,255,255,.35); }
-.scrub::-moz-range-progress { height: 3px; border-radius: 3px; background: #fff; }
-.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4.5px; border-radius: 50%; background: #fff; }
-.scrub::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #fff; }
+.slot.scrub-on .scrubber { opacity: 1; transform: none; pointer-events: auto; transition-delay: .06s; }
+.scrubber .track {
+    position: relative; width: 100%; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,.5);
+}
+.scrubber .fill {
+    position: absolute; inset: 0 auto 0 0; border-radius: 2px;
+    width: calc(var(--p) * 100%);
+    background: #c8c5c5;
+}
+.scrubber .thumb {
+    position: absolute; top: 50%;
+    left: calc(var(--p) * 100%);
+    width: 12px; height: 12px; margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: #c8c5c5;
+    transition: transform .25s var(--lift), background-color .2s, box-shadow .2s;
+}
+.scrubber:hover .thumb, .scrubber:focus-visible .thumb { transform: scale(1.3); }
+.scrubber.dragging .thumb { transform: scale(1.5); background: #fff; box-shadow: 0 0 0 2px #0b0500; }
+.scrubber .tip {
+    position: absolute; left: 50%; bottom: calc(100% + 10px);
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--fg); color: var(--bg);
+    font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap;
+    transform: translate(-50%, 4px) scale(.67); opacity: 0;
+    transition: opacity .12s ease-out, transform .12s ease-out;
+    pointer-events: none;
+}
+.scrubber.dragging .tip { opacity: 1; transform: translate(-50%, 0) scale(.67); }
+.scrubber:focus-visible { outline: none; }
 
 .pagenav {
     flex-shrink: 0;

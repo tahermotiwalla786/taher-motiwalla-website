@@ -40,54 +40,91 @@ function renderSide() {
     el.next.disabled = page === project.pages.length - 1;
 }
 
+const ICON_PLAY = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="18" height="18"><rect x="6" y="4.5" width="4" height="15" rx="1" fill="currentColor"/><rect x="14" y="4.5" width="4" height="15" rx="1" fill="currentColor"/></svg>';
+
 function makeSlot(pg) {
     const s = document.createElement('div');
     s.className = 'slot';
-    s.innerHTML = `<div class="phone">${mediaHTML(pg.media)}<span class="playflash"></span></div>`;
+    s.innerHTML = `<div class="phone">${mediaHTML(pg.media)}</div>`;
     const v = $('video', s);
     if (v) {
-        const scrub = document.createElement('input');
-        Object.assign(scrub, { type: 'range', min: 0, max: 1000, value: 0, className: 'scrub' });
-        scrub.setAttribute('aria-label', 'Scrub video');
-        $('.phone', s).append(scrub);
+        s.insertAdjacentHTML('beforeend', `
+            <button class="pp" aria-label="Pause">${ICON_PAUSE}</button>
+            <div class="scrubber" role="slider" tabindex="-1" aria-label="Scrub video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="track"><i class="fill"></i></div>
+                <div class="thumb"><span class="tip">00:00</span></div>
+            </div>`);
+        $('.phone', s).append($('.pp', s));
+        const bar = $('.scrubber', s);
+        const setPos = p => {
+            s.style.setProperty('--p', p);
+            bar.setAttribute('aria-valuenow', Math.round(p * 100));
+            $('.tip', s).textContent = fmt(p * (v.duration || 0));
+        };
         v.addEventListener('timeupdate', () => {
-            if (scrub.matches(':active')) return;
-            const p = v.duration ? v.currentTime / v.duration : 0;
-            scrub.value = p * 1000; scrub.style.setProperty('--p', p * 100 + '%');
+            if (bar.classList.contains('dragging')) return;
+            setPos(v.duration ? v.currentTime / v.duration : 0);
             if (s === currentSlot()) el.ts.textContent = fmt(v.currentTime);
         });
-        // the comment timestamp follows the scrubber as you drag
-        scrub.addEventListener('input', () => {
-            const t = v.duration ? scrub.value / 1000 * v.duration : 0;
-            v.currentTime = t;
-            scrub.style.setProperty('--p', scrub.value / 10 + '%');
-            el.ts.textContent = fmt(t);
-            el.ts.classList.remove('bump'); void el.ts.offsetWidth; el.ts.classList.add('bump');
-            showScrub(v);
+        v.addEventListener('play', () => syncPP(v));
+        v.addEventListener('pause', () => syncPP(v));
+
+        // drag anywhere on the bar; the comment timestamp follows
+        const seek = e => {
+            const r = $('.track', s).getBoundingClientRect();
+            const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+            setPos(p);
+            if (v.duration) v.currentTime = p * v.duration;
+            el.ts.textContent = fmt(p * (v.duration || 0));
+        };
+        let wasPlaying = false;
+        bar.addEventListener('pointerdown', e => {
+            bar.setPointerCapture(e.pointerId);
+            bar.classList.add('dragging');
+            wasPlaying = !v.paused;
+            v.pause();
+            seek(e);
         });
-        v.addEventListener('click', () => togglePlay(v));
+        bar.addEventListener('pointermove', e => { if (bar.classList.contains('dragging')) seek(e); });
+        const end = () => {
+            if (!bar.classList.contains('dragging')) return;
+            bar.classList.remove('dragging');
+            el.ts.classList.remove('bump'); void el.ts.offsetWidth; el.ts.classList.add('bump');
+            if (wasPlaying && !el.foot.classList.contains('commenting')) v.play().catch(() => {});
+        };
+        bar.addEventListener('pointerup', end);
+        bar.addEventListener('pointercancel', end);
+        bar.addEventListener('keydown', e => {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            e.preventDefault(); e.stopPropagation();
+            v.currentTime = Math.max(0, Math.min(v.duration || 0, v.currentTime + (e.key === 'ArrowLeft' ? -1 : 1)));
+        });
+
+        v.addEventListener('click', () => { if (!revealScrub(s)) togglePlay(v); });
+        $('.pp', s).addEventListener('click', e => { e.stopPropagation(); revealScrub(s); togglePlay(v); });
     }
     return s;
 }
 const currentSlot = () => el.phones.lastElementChild;
 const fmt = t => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 
-/* Tapping the video toggles play and slides the scrubber in.
-   It stays while paused and tucks away a moment after playing. */
-let scrubTimer;
-function showScrub(v) {
-    const ph = v.closest('.phone');
-    ph.classList.add('scrub-on');
-    clearTimeout(scrubTimer);
-    if (!v.paused) scrubTimer = setTimeout(() => ph.classList.remove('scrub-on'), 2500);
+/* First tap on a video lifts the phone and brings in the scrubber
+   and play/pause button (Figma: "Drive Home Evolution 4/4").
+   Returns true if this tap did the reveal. */
+function revealScrub(s) {
+    if (s.classList.contains('scrub-on')) return false;
+    s.classList.add('scrub-on');
+    $('.scrubber', s).tabIndex = 0;
+    return true;
+}
+function syncPP(v) {
+    const pp = $('.pp', v.closest('.slot'));
+    pp.innerHTML = v.paused ? ICON_PLAY : ICON_PAUSE;
+    pp.setAttribute('aria-label', v.paused ? 'Play' : 'Pause');
 }
 function togglePlay(v, play = v.paused) {
-    const ph = v.closest('.phone'), fl = $('.playflash', ph);
     play ? v.play().catch(() => {}) : v.pause();
-    ph.classList.toggle('paused', !play);
-    fl.textContent = play ? '▶' : '❚❚';
-    fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
-    showScrub(v);
 }
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -191,7 +228,7 @@ el.like.addEventListener('click', toggleLike);
 function openComment() {
     el.foot.classList.add('commenting');
     const v = $('video', currentSlot());
-    if (v) { if (!v.paused) togglePlay(v, false); el.ts.textContent = fmt(v.currentTime); }
+    if (v) { revealScrub(currentSlot()); togglePlay(v, false); el.ts.textContent = fmt(v.currentTime); }
     setTimeout(() => el.input.focus(), 30);
 }
 function closeComment() { el.foot.classList.remove('commenting'); el.input.value = ''; }
@@ -236,7 +273,7 @@ el.plist.addEventListener('click', e => {
 /* ── SHORTCUTS ── */
 shortcut(['↑', '↓'], 'flip pages', e => go(e.key === 'ArrowUp' ? -1 : 1));
 shortcut(['←', '→'], 'previous / next project', e => switchProject(pIndex + (e.key === 'ArrowLeft' ? -1 : 1), e.key === 'ArrowLeft' ? -1 : 1));
-shortcut(['Space'], 'play / pause video', () => { const v = $('video', currentSlot()); if (v) togglePlay(v); });
+shortcut(['Space'], 'play / pause video', () => { const v = $('video', currentSlot()); if (v) { revealScrub(currentSlot()); togglePlay(v); } });
 shortcut(['L'], 'like', toggleLike);
 shortcut(['C'], 'leave a comment', openComment);
 shortcut(['M'], 'projects menu', openMenu);
