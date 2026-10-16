@@ -28,13 +28,16 @@
         <div class="bio-top">
             <div class="intro">
                 <h1>Taher Motiwalla</h1>
-                <p>Currently designing at <button class="hl" data-panel="grubhub">Grubhub</button>. Living in <button class="hl" data-panel="brooklyn">Brooklyn, NY</button>.</p>
-                <p>Off the clock I like to <button class="hl" data-panel="paint">paint</button>, <button class="hl" data-panel="draw">draw</button>, <button class="hl" data-panel="photo">take photo</button>, <button class="hl" data-panel="music">listen music</button>, <button class="hl" data-panel="book">read book</button>, and <button class="hl" data-panel="tennis">play tennis</button>.</p>
+                <p>Currently designing at <span class="nw"><button class="hl" data-panel="grubhub">Grubhub</button>.</span> Living in <span class="nw"><button class="hl" data-panel="brooklyn">Brooklyn, NY</button>.</span></p>
+                <p>Off the clock I like to <span class="nw"><button class="hl" data-panel="paint">paint</button>,</span> <span class="nw"><button class="hl" data-panel="draw">draw</button>,</span> <span class="nw"><button class="hl" data-panel="photo">take photo</button>,</span> <span class="nw"><button class="hl" data-panel="music">listen music</button>,</span> <span class="nw"><button class="hl" data-panel="book">read book</button>,</span> and <span class="nw"><button class="hl" data-panel="tennis">play tennis</button>.</span></p>
                 <div class="contact">
                     <a class="ext" href="mailto:tahermotiwalla@gmail.com">Email</a>
                     <a class="ext" href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener">Linkedin</a>
                 </div>
             </div>
+
+            <!-- mobile: tapping a highlighted word swaps "previously" for this -->
+            <div class="mdetail" id="mdetail" hidden></div>
 
             <div class="previously">
                 <p class="label">previously</p>
@@ -58,8 +61,8 @@
 
         <div class="lang" role="group" aria-label="Language">
             <button class="on" aria-pressed="true">EN</button>
-            <button data-soon lang="hi" aria-label="Hindi (coming soon)">अ</button>
-            <button data-soon lang="ur" dir="rtl" aria-label="Urdu (coming soon)">اردو</button>
+            <button data-soon lang="hi" class="script" aria-label="Hindi (coming soon)">अ</button>
+            <button data-soon lang="ur" class="script" dir="rtl" aria-label="Urdu (coming soon)">اردو</button>
         </div>
     </section>
 

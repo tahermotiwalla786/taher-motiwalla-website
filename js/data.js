@@ -77,13 +77,14 @@ const PROJECTS = [
 /* Home-page hover panels. Drop files into assets/hobbies/
    with these names and they'll show up automatically. */
 const HOBBIES = {
-    paint:  { type: 'image', src: 'assets/hobbies/paint.jpg',  note: 'painting goes here' },
-    draw:   { type: 'image', src: 'assets/hobbies/draw.jpg',   note: 'drawing goes here' },
-    photo:  { type: 'image', src: 'assets/hobbies/photo.jpg',  note: 'photo goes here' },
-    music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 271 },
-    book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn' },
-    tennis: { type: 'tennis' },
-    brooklyn: { type: 'map' },
+    /* caption = the header / subtitle shown under the card on mobile */
+    paint:  { type: 'image', src: 'assets/hobbies/paint.jpg',  note: 'painting goes here', caption: ['painting', 'acrylic on canvas'] },
+    draw:   { type: 'image', src: 'assets/hobbies/draw.jpg',   note: 'drawing goes here',  caption: ['drawing', 'sketchbook'] },
+    photo:  { type: 'image', src: 'assets/hobbies/photo.jpg',  note: 'photo goes here',    caption: ['photo', 'shot on film'] },
+    music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 271, caption: ['on repeat', 'pain · 2pac'] },
+    book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn', caption: ['reading rn', 'the savage detectives'] },
+    tennis: { type: 'tennis', caption: ['tennis', 'drag to play'] },
+    brooklyn: { type: 'map', caption: ['brooklyn, ny', 'map coming soon'] },
 };
 
 const LINKS = {

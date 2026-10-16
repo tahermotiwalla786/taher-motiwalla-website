@@ -7,6 +7,10 @@
 const panel = $('#panel');
 const links = $$('.hl');
 const canHover = matchMedia('(hover: hover)').matches;
+const mobileMQ = matchMedia('(max-width: 900px)');
+const isMobile = () => mobileMQ.matches;
+const mdetail = $('#mdetail');
+const previously = $('.previously');
 
 let pinKey = null;     // panel that stays after a click
 let hoverKey = null;   // panel shown while hovering
@@ -56,7 +60,7 @@ const VIEWS = {
             <p class="book-cap">${b.note}<br><span class="sub">${b.title.toLowerCase()} · ${b.author.toLowerCase()}</span></p>
         </div></div>`;
     },
-    tennis: () => `<div class="pv pv-tennis"><canvas></canvas><p class="pv-note">move your mouse to play</p></div>`,
+    tennis: () => `<div class="pv pv-tennis"><canvas></canvas><p class="pv-note">${canHover ? 'move your mouse' : 'drag'} to play</p></div>`,
 };
 
 function imageView(h) {
@@ -110,11 +114,12 @@ links.forEach(l => {
         if (e.pointerType !== 'mouse') return;
         leaveTimer = setTimeout(() => { hoverKey = null; render(); }, 180);
     });
-    l.addEventListener('focus', () => { if (!isExpanded()) { hoverKey = l.dataset.panel; render(); } });
+    l.addEventListener('focus', () => { if (!isExpanded() && !isMobile()) { hoverKey = l.dataset.panel; render(); } });
     l.addEventListener('blur', () => { hoverKey = null; render(); });
     l.addEventListener('click', e => {
         e.stopPropagation();
         const k = l.dataset.panel;
+        if (isMobile()) { showMobile(mKey === k ? null : k); return; }
         if (k === 'grubhub') { setExpanded(true); return; }
         pinKey = pinKey === k ? null : k;
         hoverKey = canHover && pinKey === null ? null : hoverKey;
@@ -180,19 +185,21 @@ shortcut(['Esc'], 'close / back', () => {
 /* ── MUSIC (visual only for now) ── */
 let playerTimer = null, playerPos = 0;
 const SONG_LEN = HOBBIES.music.length;
-function tickPlayer() {
-    const p = $('.player', panel);
+function tickPlayer(root = playerRoot) {
+    const p = $('.player', root);
     if (!p) { clearInterval(playerTimer); playerTimer = null; return; }
     $('.bar i', p).style.width = (playerPos / SONG_LEN * 100) + '%';
     $('.cur', p).textContent = `${Math.floor(playerPos / 60)}:${String(Math.floor(playerPos % 60)).padStart(2, '0')}`;
 }
-function togglePlayer() {
-    const p = $('.player', panel);
+let playerRoot = panel;
+function togglePlayer(root = panel) {
+    playerRoot = root;
+    const p = $('.player', root);
     const on = !p.classList.contains('playing');
     p.classList.toggle('playing', on);
     $('.play', p).textContent = on ? '❚❚' : '▶';
     clearInterval(playerTimer);
-    if (on) playerTimer = setInterval(() => { playerPos = (playerPos + 1) % SONG_LEN; tickPlayer(); }, 1000);
+    if (on) playerTimer = setInterval(() => { playerPos = (playerPos + 1) % SONG_LEN; tickPlayer(root); }, 1000);
 }
 
 /* ── TENNIS (atari-style pong) ── */
@@ -211,6 +218,7 @@ function startTennis(cv) {
     const ro = new ResizeObserver(fit); ro.observe(cv);
     cv.addEventListener('pointermove', e => { const b = cv.getBoundingClientRect(); S.mouse = e.clientY - b.top; });
     cv.addEventListener('pointerleave', () => { S.mouse = null; });
+    cv.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') S.mouse = null; });
 
     const PW = 10, PH = () => S.h * 0.14, PX = 40;
     (function loop() {
@@ -241,8 +249,54 @@ function startTennis(cv) {
     })();
 }
 
+/* ── MOBILE ──────────────────────────────
+   Tapping a highlighted word swaps "previously" for a
+   return pill + card + caption. Grubhub lists the projects. */
+let mKey = null;
+function mobileWork() {
+    return `<div class="mcards">${PROJECTS.map((p, i) => `
+        <a class="mcard" href="project.html?p=${p.slug}" style="--i:${i}">
+            <div class="mbox"><div class="phone">${mediaHTML(p.cover, { placeholder: p.title + '<br>coming soon' })}</div></div>
+            <div class="mcap"><div class="txt"><b>${p.title}</b><span>${p.cardTags.join('  ')}</span></div><span class="pill">see more</span></div>
+        </a>`).join('')}</div>`;
+}
+function showMobile(k) {
+    mKey = k;
+    links.forEach(l => l.classList.toggle('active', l.dataset.panel === k));
+    if (!k) {
+        mdetail.hidden = true;
+        mdetail.innerHTML = '';
+        previously.hidden = false;
+        previously.classList.remove('m-in'); void previously.offsetWidth; previously.classList.add('m-in');
+        return;
+    }
+    const h = HOBBIES[k];
+    const body = k === 'grubhub' ? mobileWork()
+        : `<div class="mbox${k === 'music' || k === 'book' ? ' bare' : ''} mbox-${k}">${VIEWS[k]()}</div>
+           <div class="mcap"><div class="txt"><b>${h.caption[0]}</b><span>${h.caption[1]}</span></div></div>`;
+    mdetail.innerHTML = `<button class="pill mret" data-act="mreturn"><span class="i i-return"></span>return</button>${body}`;
+    previously.hidden = true;
+    mdetail.hidden = false;
+    mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
+    if (k === 'tennis') startTennis($('canvas', mdetail));
+    mdetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+mdetail.addEventListener('click', e => {
+    e.stopPropagation();
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'mreturn') { showMobile(null); return; }
+    if (act === 'play') { togglePlayer(mdetail); return; }
+    if (act === 'rew') { playerPos = 0; tickPlayer(mdetail); return; }
+    const card = e.target.closest('.mcard');
+    if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
+});
+// rotating to desktop width: drop the mobile state
+mobileMQ.addEventListener('change', () => { if (!isMobile()) showMobile(null); });
+
 /* deep link from project pages: index.html#projects */
-if (location.hash === '#projects') {
+if (location.hash === '#projects' && isMobile()) {
+    showMobile('grubhub');
+} else if (location.hash === '#projects') {
     document.documentElement.classList.add('no-anim');
     setExpanded(true);
     requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')));

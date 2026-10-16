@@ -34,6 +34,14 @@ function renderSide() {
     el.body.classList.toggle('centered', !isOverview);
     el.body.innerHTML = isOverview ? overviewHTML(project.overview)
         : `<div class="pg"><h2>${pg.title}</h2><p class="body">${pg.body || ''}</p></div>`;
+    // mobile: ‹ n/7 › sits beside the title
+    $('h2', el.body).insertAdjacentHTML('afterend', `<span class="mpager">
+        <button data-go="-1" aria-label="Previous page" ${page === 0 ? 'disabled' : ''}><span class="i i-up rot-left"></span></button>
+        <b>${page + 1}/${project.pages.length}</b>
+        <button data-go="1" aria-label="Next page" ${page === project.pages.length - 1 ? 'disabled' : ''}><span class="i i-up rot-right"></span></button></span>`);
+    const h2 = $('h2', el.body), pager = $('.mpager', el.body);
+    const head = document.createElement('div'); head.className = 'pg-head';
+    h2.before(head); head.append(h2, pager);
     el.counter.textContent = `${page + 1}/${project.pages.length}`;
     el.counter.classList.remove('tick'); void el.counter.offsetWidth; el.counter.classList.add('tick');
     el.prev.disabled = page === 0;
@@ -136,15 +144,19 @@ function renderPhone(dir) {
     if (!old || reduce) { old?.remove(); return; }
     const d = 60 * dir;
     const opts = { duration: 550, easing: 'cubic-bezier(.2,.8,.2,1)' };
-    old.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(-50%, calc(-50% - ${d}px)) scale(.94)`, opacity: 0 }], opts)
+    // desktop flips vertically (scroll); mobile slides sideways (swipe)
+    const at = off => matchMedia('(max-width: 900px)').matches
+        ? `translate(calc(-50% + ${off}px), -50%)` : `translate(-50%, calc(-50% + ${off}px))`;
+    old.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `${at(-d)} scale(.94)`, opacity: 0 }], opts)
         .finished.catch(() => {}).then(() => old.remove());
     setTimeout(() => old.remove(), opts.duration + 100); // in case the animation never finishes (background tab)
-    s.animate([{ transform: `translate(-50%, calc(-50% + ${d}px)) scale(.94)`, opacity: 0 }, { transform: 'translate(-50%,-50%)', opacity: 1 }], opts);
+    s.animate([{ transform: `${at(d)} scale(.94)`, opacity: 0 }, { transform: 'translate(-50%,-50%)', opacity: 1 }], opts);
 }
 
 function renderProject() {
     document.title = `${project.title} — Taher Motiwalla`;
     el.title.textContent = project.title;
+    $('#mptitle').textContent = project.title;
     el.logo.src = project.logo;
     renderLikes();
     renderSide();
@@ -163,6 +175,7 @@ function go(delta) {
     closeComment();
 }
 el.prev.addEventListener('click', () => go(-1));
+el.body.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(+b.dataset.go); });
 el.next.addEventListener('click', () => go(1));
 
 function switchProject(i, dir = 1) {
@@ -188,30 +201,37 @@ $('.proj').addEventListener('wheel', e => {
 }, { passive: false });
 
 // touch: vertical swipe on the stage
-let touchY = null;
-$('.stage-media').addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
-$('.stage-media').addEventListener('touchend', e => {
-    if (touchY == null) return;
-    const dy = touchY - e.changedTouches[0].clientY;
-    if (Math.abs(dy) > 40) go(Math.sign(dy));
-    touchY = null;
+// touch: swipe sideways (or up/down) anywhere outside the scrubber to flip pages
+let touch = null;
+$('.proj').addEventListener('touchstart', e => {
+    if (e.target.closest('.scrubber, input, button')) { touch = null; return; }
+    touch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+$('.proj').addEventListener('touchend', e => {
+    if (!touch) return;
+    const dx = touch.x - e.changedTouches[0].clientX, dy = touch.y - e.changedTouches[0].clientY;
+    touch = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 40) return;
+    go(Math.sign(Math.abs(dx) > Math.abs(dy) ? dx : dy));
 });
 
 /* ── LIKES (placeholder) ── */
 function renderLikes() {
     const n = likes[project.slug] || 0;
-    el.likes.textContent = String(n).padStart(2, '0');
-    el.like.setAttribute('aria-pressed', n > 0);
+    $$('.like').forEach(b => {
+        $('.count', b).textContent = String(n).padStart(2, '0');
+        b.setAttribute('aria-pressed', n > 0);
+    });
 }
 function toggleLike() {
     const on = !(likes[project.slug] > 0);
     likes[project.slug] = on ? 1 : 0;
     renderLikes();
-    el.like.classList.remove('pop'); void el.like.offsetWidth; el.like.classList.add('pop');
-    if (on && !reduce) burst();
+    $$('.like').forEach(b => { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); });
+    if (on && !reduce) $$('.like').forEach(b => { if (b.offsetParent) burst(b); });
 }
-function burst() {
-    const h = $('.heart', el.like);
+function burst(btn) {
+    const h = $('.heart', btn);
     for (let i = 0; i < 8; i++) {
         const dot = document.createElement('span');
         dot.className = 'burst';
@@ -222,7 +242,7 @@ function burst() {
                     { duration: 500, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished.then(() => dot.remove());
     }
 }
-el.like.addEventListener('click', toggleLike);
+$$('.like').forEach(b => b.addEventListener('click', toggleLike));
 
 /* ── COMMENTS (placeholder) ── */
 function openComment() {
@@ -257,6 +277,7 @@ function renderMenu(q = '') {
 }
 function openMenu() { el.search.value = ''; renderMenu(); openOverlay(el.menu); }
 $('#projmenu').addEventListener('click', openMenu);
+$('#mpill').addEventListener('click', openMenu);
 el.search.addEventListener('input', () => renderMenu(el.search.value));
 el.search.addEventListener('keydown', e => {
     if (e.key === 'Enter') { const first = $('.prow', el.plist); if (first) first.click(); }
