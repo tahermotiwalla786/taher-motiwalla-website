@@ -89,11 +89,11 @@ img, video { display: block; }
 .circle-btn .i-linkedin { width: 28.8px; height: 28.8px; }
 
 /* Theme toggle: icon swaps with a little spin */
-.theme-toggle .i { transition: transform .5s var(--spring), opacity .2s; }
+.theme-toggle .i { transition: transform .3s var(--ease), opacity .16s; }
 .theme-toggle .i-sun { display: none; }
 :root[data-theme="light"] .theme-toggle .i-sun { display: inline-block; }
 :root[data-theme="light"] .theme-toggle .i-moon { display: none; }
-.theme-toggle.spin .i { transform: rotate(180deg) scale(.6); opacity: 0; }
+.theme-toggle.spin .i { transform: rotate(-30deg) scale(.85); opacity: 0; }
 
 .pill {
     display: inline-flex; align-items: center; gap: 8px;

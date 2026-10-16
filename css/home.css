@@ -3,29 +3,22 @@ body.home { overflow: hidden; }
 .home-grid {
     --pad-y: clamp(24px, 7.8vh, 108px);
     --pad-x: clamp(20px, 6.25vw, 108px);
+    --gap: clamp(32px, 8vw, 144px);
     position: relative;
     height: 100vh; height: 100dvh;
     padding: var(--pad-y) var(--pad-x);
-    display: grid;
-    grid-template-columns: 400px minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    column-gap: clamp(32px, 8vw, 144px);
-    transition: grid-template-columns .7s var(--ease), column-gap .7s var(--ease), padding .7s var(--ease);
-}
-.expanded .home-grid {
-    grid-template-columns: 0px minmax(0, 1fr);
-    column-gap: 0;
-    padding-inline: clamp(16px, 4.2vw, 72px);
 }
 
 /* ── BIO ── */
 .bio {
+    width: 400px; height: 100%;
     display: flex; flex-direction: column; justify-content: space-between;
-    min-width: 0;
-    transition: opacity .35s var(--ease), transform .5s var(--ease);
+    transition: opacity .3s var(--ease);
 }
-.expanded .bio { opacity: 0; transform: translateX(-24px); pointer-events: none; }
-.bio-top { display: flex; flex-direction: column; gap: 48px; width: 400px; max-width: 100%; }
+/* only fades: the column never resizes, so the text never reflows */
+.expanded .bio { opacity: 0; pointer-events: none; transition-delay: 0s; }
+.bio { transition-delay: .25s; }
+.bio-top { display: flex; flex-direction: column; gap: 48px; }
 .intro { display: flex; flex-direction: column; gap: 24px; }
 .intro h1 { font-size: 24px; font-weight: 700; }
 .intro p { font-size: 16px; line-height: normal; }
@@ -71,54 +64,56 @@ body.home { overflow: hidden; }
     position: absolute;
     top: var(--pad-y); right: var(--pad-x);
     z-index: 5;
-    transition: transform .25s var(--spring), opacity .35s, background-color .4s var(--ease);
 }
-.expanded .theme-toggle { opacity: 0; pointer-events: none; }
 
-/* ── STAGE / PANEL ── */
-.stage {
-    position: relative;
-    min-width: 0;
-    height: 100%;
-    display: flex; justify-content: flex-end; align-items: flex-start;
-    padding-right: 72px; /* room for the theme toggle */
-    transition: padding .7s var(--ease);
-}
-.expanded .stage { padding-right: 0; }
+/* ── PANEL ──
+   The panel is always laid out at its expanded size. When collapsed,
+   its left part is clipped away (--inset), so expanding only slides
+   the left edge — nothing moves vertically and nothing reflows. */
 .panel {
+    --inset: max(400px + var(--gap), 100% - 968px);
+    --ease-x: cubic-bezier(.65, 0, .25, 1);
     container-type: size;
-    position: relative;
-    width: min(968px, 100%);
-    height: min(900px, 100%);
-    border-radius: 36px;
-    background: var(--surface);
-    overflow: hidden;
+    position: absolute;
+    top: var(--pad-y);
+    left: var(--pad-x);
+    right: calc(var(--pad-x) + 72px); /* room for the theme toggle */
+    height: min(900px, 100% - 2 * var(--pad-y));
+    clip-path: inset(0 0 0 var(--inset) round 36px);
     opacity: 0;
     transform: translateX(24px) scale(.98);
-    transform-origin: left center;
+    transform-origin: right center;
     pointer-events: none;
     transition:
         opacity .3s var(--ease),
         transform .45s var(--spring),
-        width .7s var(--ease), height .7s var(--ease),
-        background-color .4s var(--ease);
+        clip-path .65s var(--ease-x);
 }
+.panel::before { /* the brown card */
+    content: ''; position: absolute; inset: 0;
+    background: var(--surface);
+    transition: background-color .4s var(--ease), opacity .3s;
+}
+.panel.bare::before { opacity: 0; }
 .panel.show { opacity: 1; transform: none; pointer-events: auto; }
 .panel.bounce { animation: bounce .9s var(--spring) .15s; }
 @keyframes bounce {
     0%, 100% { transform: none; }
-    35% { transform: translateX(-14px) scale(1.01); }
+    35% { transform: translateX(-14px); }
     65% { transform: translateX(4px); }
 }
-.expanded .panel { width: 100%; height: 100%; }
-/* Theme tick so the toggle keeps the hint visible on top */
-.panel.show:not(.pinned) { cursor: default; }
+.expanded .panel { clip-path: inset(0 0 0 0 round 36px); }
 
-.pv { position: absolute; inset: 0; animation: pv-in .35s var(--ease); }
+.pv {
+    position: absolute; top: 0; bottom: 0; right: 0;
+    left: var(--inset);
+    animation: pv-in .35s var(--ease);
+    transition: left .65s var(--ease-x);
+}
+.expanded .pv { left: 0; }
 @keyframes pv-in { from { opacity: 0; } }
 
 .pv-note {
-    position: absolute; inset: 0;
     display: grid; place-items: center; align-content: center; gap: 4px;
     padding: 32px;
     font-size: 14px; font-weight: 300;
@@ -131,7 +126,7 @@ body.home { overflow: hidden; }
 
 /* ── GRUBHUB / PROJECTS ── */
 .pv-work .top-pill {
-    position: absolute; top: 48px; left: 50%; z-index: 2;
+    position: absolute; top: 24px; left: 50%; z-index: 2;
     transform: translateX(-50%);
 }
 .pill-swap { position: relative; display: grid; }
@@ -140,48 +135,41 @@ body.home { overflow: hidden; }
 .expanded .pill-swap .when-open { opacity: 1; transform: none; }
 .expanded .pill-swap .when-closed { opacity: 0; transform: translateY(-6px); }
 
+/* Phones are the same size in both states: as tall as the panel
+   allows after the pill (top) and captions (bottom). */
 .cards {
     position: absolute;
-    left: 0; right: 0;
-    top: 16.7cqh;
+    left: 0; right: 0; top: 96px;
     display: flex; gap: 48px;
     padding: 0 48px;
     overflow-x: hidden;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
-    transition: top .7s var(--ease);
 }
 .cards::-webkit-scrollbar { display: none; }
-.expanded .cards { top: 50%; transform: translateY(-50%); overflow-x: auto; margin-top: 50px; padding-bottom: 8px; }
+.expanded .cards { overflow-x: auto; }
 .cards::after { content: ''; flex: 0 0 1px; } /* end padding for scroll */
 
 .card {
+    --ph: calc(100cqh - 96px - 96px); /* top: pill · bottom: 2-line caption */
     flex: 0 0 auto;
-    display: flex; flex-direction: column; gap: 24px;
+    width: calc(var(--ph) * 306 / 620); /* card is as wide as its phone */
+    display: flex; flex-direction: column; gap: 16px;
     scroll-snap-align: start;
     scroll-margin-left: 48px;
     text-decoration: none;
-    --ph: 89cqh;
-    width: calc(var(--ph) * 306 / 620); /* card is as wide as its phone */
-    transition: width .7s var(--ease);
 }
-.expanded .card { --ph: min(73.5cqh, calc(100cqh - 260px)); }
 .card .phone {
     height: var(--ph);
     border-radius: 34px;
-    transition: height .7s var(--ease), transform .35s var(--spring), background-color .4s;
+    transition: transform .35s var(--spring), background-color .4s;
 }
 .expanded .card:hover .phone { transform: translateY(-6px); }
-.card-meta {
-    display: flex; align-items: center; gap: 10px;
-    padding: 0 16px;
-    opacity: 0; transform: translateY(10px);
-    transition: opacity .35s, transform .5s var(--spring);
-}
-.expanded .card-meta { opacity: 1; transform: none; transition-delay: .35s; }
+.card-meta { display: flex; align-items: flex-start; gap: 8px; padding: 0 6px; }
+.card-meta .pill { font-size: 14px; padding: 6px 8px; }
 .card-meta .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; text-transform: lowercase; }
 .card-meta .t { font-size: 16px; font-weight: 700; }
-.card-meta .tags { display: flex; flex-wrap: wrap; gap: 0 8px; font-size: 14px; font-weight: 300; }
+.card-meta .tags { display: flex; flex-wrap: nowrap; overflow: hidden; gap: 0 8px; font-size: 14px; font-weight: 300; }
 .card-meta .tags span { white-space: nowrap; }
 
 /* ── MUSIC ── */
@@ -254,19 +242,15 @@ body.home { overflow: hidden; }
 
 /* ── TENNIS ── */
 .pv-tennis canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pv-tennis .pv-note { inset: auto 0 24px; display: block; padding: 0; color: var(--fg-muted); }
+.pv-tennis .pv-note { position: absolute; inset: auto 0 24px; display: block; padding: 0; color: var(--fg-muted); }
 
 /* ── SMALL SCREENS ── (mobile design comes later) */
 @media (max-width: 900px) {
     body.home { overflow: auto; }
-    .home-grid { display: block; height: auto; min-height: 100dvh; }
-    .bio { min-height: calc(100dvh - 2 * var(--pad-y)); gap: 48px; }
-    .bio-top { width: 100%; padding-right: 56px; }
-    .stage { position: fixed; inset: 0; z-index: 20; padding: 16px; pointer-events: none; align-items: center; }
-    .panel { width: 100%; height: min(80dvh, 720px); }
-    .panel.show { box-shadow: 0 0 0 100vmax rgba(0,0,0,.5); }
-    .expanded .panel { height: 100%; }
+    .home-grid { height: auto; min-height: 100dvh; }
+    .bio { width: 100%; height: auto; min-height: calc(100dvh - 2 * var(--pad-y)); gap: 48px; }
+    .bio-top { padding-right: 56px; }
+    .panel { position: fixed; inset: 10dvh 16px; height: auto; --inset: 0px; z-index: 20; }
+    .expanded .panel { inset: 0; }
     .expanded .cards { gap: 24px; padding: 0 24px; }
-    .expanded .stage { padding: 0; }
-    .expanded .panel { border-radius: 0; }
 }

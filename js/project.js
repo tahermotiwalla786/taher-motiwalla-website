@@ -56,9 +56,14 @@ function makeSlot(pg) {
             scrub.value = p * 1000; scrub.style.setProperty('--p', p * 100 + '%');
             if (s === currentSlot()) el.ts.textContent = fmt(v.currentTime);
         });
+        // the comment timestamp follows the scrubber as you drag
         scrub.addEventListener('input', () => {
-            if (v.duration) v.currentTime = scrub.value / 1000 * v.duration;
+            const t = v.duration ? scrub.value / 1000 * v.duration : 0;
+            v.currentTime = t;
             scrub.style.setProperty('--p', scrub.value / 10 + '%');
+            el.ts.textContent = fmt(t);
+            el.ts.classList.remove('bump'); void el.ts.offsetWidth; el.ts.classList.add('bump');
+            showScrub(v);
         });
         v.addEventListener('click', () => togglePlay(v));
     }
@@ -67,12 +72,22 @@ function makeSlot(pg) {
 const currentSlot = () => el.phones.lastElementChild;
 const fmt = t => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 
-function togglePlay(v) {
+/* Tapping the video toggles play and slides the scrubber in.
+   It stays while paused and tucks away a moment after playing. */
+let scrubTimer;
+function showScrub(v) {
+    const ph = v.closest('.phone');
+    ph.classList.add('scrub-on');
+    clearTimeout(scrubTimer);
+    if (!v.paused) scrubTimer = setTimeout(() => ph.classList.remove('scrub-on'), 2500);
+}
+function togglePlay(v, play = v.paused) {
     const ph = v.closest('.phone'), fl = $('.playflash', ph);
-    v.paused ? v.play().catch(() => {}) : v.pause();
-    ph.classList.toggle('paused', v.paused);
-    fl.textContent = v.paused ? '❚❚' : '▶';
+    play ? v.play().catch(() => {}) : v.pause();
+    ph.classList.toggle('paused', !play);
+    fl.textContent = play ? '▶' : '❚❚';
     fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+    showScrub(v);
 }
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -176,7 +191,7 @@ el.like.addEventListener('click', toggleLike);
 function openComment() {
     el.foot.classList.add('commenting');
     const v = $('video', currentSlot());
-    if (v) el.ts.textContent = fmt(v.currentTime);
+    if (v) { if (!v.paused) togglePlay(v, false); el.ts.textContent = fmt(v.currentTime); }
     setTimeout(() => el.input.focus(), 30);
 }
 function closeComment() { el.foot.classList.remove('commenting'); el.input.value = ''; }

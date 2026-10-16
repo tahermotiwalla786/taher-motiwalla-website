@@ -80,7 +80,7 @@ const HOBBIES = {
     paint:  { type: 'image', src: 'assets/hobbies/paint.jpg',  note: 'painting goes here' },
     draw:   { type: 'image', src: 'assets/hobbies/draw.jpg',   note: 'drawing goes here' },
     photo:  { type: 'image', src: 'assets/hobbies/photo.jpg',  note: 'photo goes here' },
-    music:  { type: 'music', song: 'song tbd', artist: 'artist tbd' },
+    music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 271 },
     book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn' },
     tennis: { type: 'tennis' },
     brooklyn: { type: 'map' },

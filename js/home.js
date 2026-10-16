@@ -45,7 +45,7 @@ const VIEWS = {
             <div class="art"></div>
             <div><div class="song">${m.song}<span class="eq"><i></i><i></i><i></i></span></div><div class="artist">${m.artist}</div></div>
             <div class="bar"><i></i></div>
-            <div class="times"><span class="cur">0:00</span><span>3:24</span></div>
+            <div class="times"><span class="cur">0:00</span><span>${Math.floor(m.length / 60)}:${String(m.length % 60).padStart(2, '0')}</span></div>
             <div class="ctrl"><button aria-label="Previous" data-act="rew">⏮</button><button class="play" aria-label="Play" data-act="play">▶</button><button aria-label="Next" data-act="rew">⏭</button></div>
         </div></div>`;
     },
@@ -72,6 +72,7 @@ function render() {
         l.setAttribute('aria-expanded', l.dataset.panel === key);
     });
     panel.classList.toggle('pinned', !!pinKey && key === pinKey);
+    panel.classList.toggle('bare', key === 'music' || key === 'book'); // no brown card behind these
     if (!key) {
         panel.classList.remove('show');
         shownKey = null;
@@ -178,7 +179,7 @@ shortcut(['Esc'], 'close / back', () => {
 
 /* ── MUSIC (visual only for now) ── */
 let playerTimer = null, playerPos = 0;
-const SONG_LEN = 204;
+const SONG_LEN = HOBBIES.music.length;
 function tickPlayer() {
     const p = $('.player', panel);
     if (!p) { clearInterval(playerTimer); playerTimer = null; return; }
