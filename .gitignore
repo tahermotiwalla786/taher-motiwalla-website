@@ -13,6 +13,7 @@ hd *.png
 # Local-only: raw design exports, backups, tooling
 Portfolio update assets/
 Project Screens/
+videos/
 BACKUP_*.tar.gz
 .write-test
 .claude/
