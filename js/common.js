@@ -76,6 +76,7 @@ document.addEventListener('keydown', e => {
         if (typing) { e.target.blur(); }
     }
     if (typing) return;
+    if (e.key === '?' && typeof toggleShortcuts === 'function') { toggleShortcuts(); return; } // project page: popover
     if (e.key === '?') {
         const o = $('#shortcuts') || buildShortcutSheet();
         o.classList.contains('open') ? closeOverlay(o) : openOverlay(o);

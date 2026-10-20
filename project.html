@@ -41,11 +41,17 @@
     <section class="stage">
         <div class="stage-media">
             <img class="stage-bg" src="assets/img/project-bg.png" alt="">
-            <a class="backbar" href="index.html#projects"><span class="back-ic"><span class="i i-back"></span></span>Back to projects</a>
+            <a class="backbtn" href="index.html#projects" aria-label="Back to projects"><span class="i i-back"></span><span class="lbl">projects</span></a>
             <div class="phones" id="phones"></div>
         </div>
         <div class="pagenav">
-            <p class="hint" id="hint"><span class="kbd">↑</span><span class="kbd">↓</span> to flip · <span class="kbd">?</span> shortcuts</p>
+            <div class="sc-wrap">
+                <button class="sc-btn" id="sc-btn" aria-expanded="false" aria-controls="sc-pop"><span class="i i-cmd"></span>Shortcuts</button>
+                <div class="sc-pop" id="sc-pop" role="dialog" aria-label="Keyboard shortcuts" hidden>
+                    <div class="sc-head">shortcuts <button id="sc-close" aria-label="Close shortcuts"><span class="i i-close"></span></button></div>
+                    <div class="sc-list" id="sc-list"></div>
+                </div>
+            </div>
             <div class="pagenav-c">
                 <button id="prev" aria-label="Previous page"><span class="i i-up"></span></button>
                 <button class="like" id="like" aria-pressed="false" aria-label="Like"><span class="heart"><span class="i i-heart"></span><span class="i i-heart-fill"></span></span><span class="count" id="likes">00</span></button>
@@ -64,15 +70,16 @@
         <div class="side-body" id="sidebody"></div>
         <div class="mlike-row"><button class="like mlike" aria-pressed="false" aria-label="Like"><span class="heart"><span class="i i-heart"></span><span class="i i-heart-fill"></span></span><span class="count">00</span></button></div>
         <div class="side-foot" id="sidefoot">
-            <button class="btn" id="comment-open">Leave a comment</button>
+            <button class="btn" id="comment-open">Ask a question</button>
             <form class="comment" id="comment">
                 <label class="comment-field">
                     <span class="ts" id="ts">00:00</span>
-                    <input id="comment-input" placeholder="Add a comment" autocomplete="off" aria-label="Add a comment">
+                    <input id="comment-input" placeholder="Type your question" autocomplete="off" aria-label="Your question">
                 </label>
+                <p class="ask-note"><span class="i i-email"></span>goes to taher's inbox, sent from your email app</p>
                 <div class="comment-btns">
                     <button type="button" class="btn" id="comment-cancel">Cancel</button>
-                    <button type="submit" class="btn solid">Send</button>
+                    <button type="submit" class="btn solid">Send email<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
                 </div>
             </form>
         </div>

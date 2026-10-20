@@ -76,6 +76,7 @@ img, video { display: block; }
 .i-return  { --src: url(../assets/icons/return.svg); }
 .i-book    { --src: url(../assets/icons/book.svg); }
 .i-chat    { --src: url(../assets/icons/chat.svg); }
+.i-cmd     { --src: url(../assets/icons/command.svg); }
 
 .circle-btn {
     width: 48px; height: 48px;

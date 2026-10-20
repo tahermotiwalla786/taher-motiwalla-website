@@ -1,7 +1,7 @@
 /* ── PROJECT PAGE ─────────────────────────
    Scroll, ↑/↓ or the carets flip through pages.
-   Likes and comments are visual only for now —
-   nothing is stored.
+   Likes are visual only for now. Questions open
+   a pre-filled email to Taher.
    ──────────────────────────────────────── */
 
 const params = new URLSearchParams(location.search);
@@ -13,7 +13,7 @@ const likes = {};   // in-memory only
 const el = {
     phones: $('#phones'), prev: $('#prev'), next: $('#next'), counter: $('#counter'),
     like: $('#like'), likes: $('#likes'), body: $('#sidebody'), title: $('#ptitle'), logo: $('#logo'),
-    foot: $('#sidefoot'), ts: $('#ts'), input: $('#comment-input'), hint: $('#hint'),
+    foot: $('#sidefoot'), ts: $('#ts'), input: $('#comment-input'),
     menu: $('#menu'), plist: $('#plist'), search: $('#psearch'),
 };
 
@@ -126,6 +126,17 @@ function revealScrub(s) {
     $('.scrubber', s).tabIndex = 0;
     return true;
 }
+/* Clicking the picture around the phone undoes the reveal:
+   the phone settles back down and the scrubber slides away. */
+function hideScrub(s) {
+    if (!s?.classList.contains('scrub-on')) return;
+    s.classList.remove('scrub-on');
+    $('.scrubber', s).tabIndex = -1;
+}
+$('.stage-media').addEventListener('click', e => {
+    if (e.target.closest('.phone, .scrubber, .backbtn') || el.foot.classList.contains('commenting')) return;
+    hideScrub(currentSlot());
+});
 function syncPP(v) {
     const pp = $('.pp', v.closest('.slot'));
     pp.innerHTML = v.paused ? ICON_PLAY : ICON_PAUSE;
@@ -171,7 +182,6 @@ function go(delta) {
     lastFlip = performance.now();
     renderSide();
     renderPhone(delta);
-    el.hint.classList.add('gone');
     closeComment();
 }
 el.prev.addEventListener('click', () => go(-1));
@@ -244,7 +254,9 @@ function burst(btn) {
 }
 $$('.like').forEach(b => b.addEventListener('click', toggleLike));
 
-/* ── COMMENTS (placeholder) ── */
+/* ── ASK A QUESTION ──
+   Same look as the old comment box. Send opens the visitor's email app
+   with the project, page and video time already filled in. */
 function openComment() {
     el.foot.classList.add('commenting');
     const v = $('video', currentSlot());
@@ -257,8 +269,11 @@ $('#comment-cancel').addEventListener('click', closeComment);
 $('#comment').addEventListener('submit', e => {
     e.preventDefault();
     if (!el.input.value.trim()) { el.input.focus(); return; }
+    const pg = project.pages[page];
+    const subject = `Question: ${project.title} — ${pg.title} @ ${el.ts.textContent}`;
+    location.href = `${LINKS.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(el.input.value.trim())}`;
     closeComment();
-    toast('thanks! comments are a preview — not saved yet');
+    toast('opening your email app');
 });
 el.input.addEventListener('keydown', e => { if (e.key === 'Escape') closeComment(); });
 
@@ -296,21 +311,33 @@ shortcut(['↑', '↓'], 'flip pages', e => go(e.key === 'ArrowUp' ? -1 : 1));
 shortcut(['←', '→'], 'previous / next project', e => switchProject(pIndex + (e.key === 'ArrowLeft' ? -1 : 1), e.key === 'ArrowLeft' ? -1 : 1));
 shortcut(['Space'], 'play / pause video', () => { const v = $('video', currentSlot()); if (v) { revealScrub(currentSlot()); togglePlay(v); } });
 shortcut(['L'], 'like', toggleLike);
-shortcut(['C'], 'leave a comment', openComment);
+shortcut(['Q'], 'ask a question', openComment);
 shortcut(['M'], 'projects menu', openMenu);
 shortcut(['/'], 'search projects', () => { openMenu(); setTimeout(() => el.search.focus(), 60); });
 shortcut(['Esc'], 'back to projects', () => {
+    if (!scPop.hidden) { toggleShortcuts(false); return; }
     if (el.foot.classList.contains('commenting')) { closeComment(); return; }
     location.href = 'index.html#projects';
 });
 KEYMAP.space = ' ';
+
+/* shortcuts popover (common.js sends ? here too) */
+const scPop = $('#sc-pop'), scBtn = $('#sc-btn');
+function toggleShortcuts(open = scPop.hidden) {
+    if (open) $('#sc-list').innerHTML = [...SHORTCUTS, { keys: ['?'], label: 'show shortcuts' }].map(s =>
+        `<div><span>${s.keys.map(k => `<span class="kbd">${k}</span>`).join('')}</span><span>${s.label}</span></div>`).join('');
+    scPop.hidden = !open;
+    scBtn.setAttribute('aria-expanded', open);
+}
+scBtn.addEventListener('click', e => { e.stopPropagation(); toggleShortcuts(); });
+$('#sc-close').addEventListener('click', () => toggleShortcuts(false));
+document.addEventListener('click', e => { if (!scPop.hidden && !e.target.closest('.sc-wrap')) toggleShortcuts(false); });
 
 /* ── START (behind the password gate) ── */
 function start() {
     document.body.classList.remove('locked');
     renderProject();
     renderPhone(0);
-    setTimeout(() => el.hint.classList.add('gone'), 8000);
 }
 requireUnlock(start);
 // closing the gate without the password goes home
