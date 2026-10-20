@@ -283,6 +283,9 @@ body.home { overflow: hidden; }
     transition: transform .2s var(--spring);
 }
 .player .play:active { transform: scale(.9); }
+/* Spotify's embed: a slim bar that's the credit and the real player */
+.player .spot, .player iframe { width: 100%; height: 80px; border: 0; border-radius: 12px; display: block; }
+.player .spot { background: var(--fg-faint); }
 .eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; margin-left: 8px; }
 .eq i { width: 2px; background: var(--fg); height: 30%; }
 .player.playing .eq i { animation: eq .8s ease-in-out infinite alternate; }
@@ -291,31 +294,26 @@ body.home { overflow: hidden; }
 @keyframes eq { to { height: 100%; } }
 
 /* ── BOOK ── */
-.book-wrap {
-    position: absolute; inset: 0;
-    display: grid; place-items: center; align-content: center; gap: 24px;
-    perspective: 900px;
-}
+.book-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+/* flat and large; capped near the cover file's own 500px height so it stays sharp */
 .book {
-    width: min(220px, 40cqw); aspect-ratio: 2 / 3;
-    padding: 20px 18px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    background: #e9dccb; color: #0b0500;
+    height: min(80cqh, 520px); aspect-ratio: 307 / 500;
+    object-fit: cover;
+    background: #e9dccb;
     border-radius: 2px 6px 6px 2px;
-    box-shadow: inset 6px 0 0 rgba(0,0,0,.12), 0 20px 40px rgba(0,0,0,.35);
-    transform: rotateY(-18deg) rotateX(4deg);
-    transition: transform .6s var(--spring);
+    box-shadow: 0 20px 40px rgba(0,0,0,.35);
+    transition: transform .4s var(--spring);
 }
-.book:hover { transform: rotateY(0) rotateX(0) translateY(-4px); }
-.book .bt { font-weight: 700; font-size: 20px; line-height: 1.1; text-transform: uppercase; }
-.book .stripe { height: 34%; background: linear-gradient(#c4410d, #ff8d58); margin: 0 -18px; }
-.book .ba { font-size: 12px; }
-.book-cap { font-size: 14px; font-weight: 300; text-transform: lowercase; text-align: center; }
-.book-cap .sub { color: var(--fg-muted); }
+.book:hover { transform: translateY(-4px); }
 
 /* ── TENNIS ── */
 .pv-tennis canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pv-tennis .pv-note { position: absolute; inset: auto 0 24px; display: block; padding: 0; color: var(--fg-muted); }
+/* a chip over the court, so the dashed net line doesn't run through the text */
+.pv-tennis .pv-note {
+    position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+    display: block; padding: 4px 10px; border-radius: 4px;
+    background: var(--surface); color: var(--fg-muted); white-space: nowrap;
+}
 
 /* ── MOBILE ── (Figma: Mobile / Site Home) */
 .mdetail { display: flex; flex-direction: column; gap: 24px; }
@@ -334,7 +332,8 @@ body.home { overflow: hidden; }
 }
 .mbox .pv { left: 0; }
 .mbox.bare { background: none; aspect-ratio: auto; height: 380px; overflow: visible; }
-.mbox-book.bare { height: 340px; }
+.mbox-book.bare { height: 420px; }
+.mbox-music.bare { height: 500px; } /* record player + spotify bar */
 .mbox .player { width: min(300px, 100%); }
 .mbox canvas { touch-action: none; }
 .mcap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px; }

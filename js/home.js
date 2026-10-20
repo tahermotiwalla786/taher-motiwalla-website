@@ -16,6 +16,7 @@ let pinKey = null;     // panel that stays after a click
 let hoverKey = null;   // panel shown while hovering
 let shownKey = null;
 let leaveTimer;
+let switchTimer;     // pending swap to another word's panel (hover intent)
 let bounced = false;
 
 /* ── RENDERERS ── */
@@ -53,14 +54,14 @@ const VIEWS = {
             <div><div class="song">${m.song}<span class="eq"><i></i><i></i><i></i></span></div><div class="artist">${m.artist}</div></div>
             <div class="bar"><i></i></div>
             <div class="times"><span class="cur">0:00</span><span>${Math.floor(m.length / 60)}:${String(m.length % 60).padStart(2, '0')}</span></div>
-            <div class="ctrl"><button aria-label="Previous" data-act="rew">⏮</button><button class="play" aria-label="Play" data-act="play">▶</button><button aria-label="Next" data-act="rew">⏭</button></div>
+            <div class="ctrl"><button aria-label="Back to start" data-act="rew">⏮</button><button class="play" aria-label="Play" data-act="play">▶</button><button aria-label="Back to start" data-act="rew">⏭</button></div>
+            <div class="spot" data-spot></div>
         </div></div>`;
     },
     book: () => {
         const b = HOBBIES.book;
         return `<div class="pv"><div class="book-wrap">
-            <div class="book"><span class="bt">${b.title}</span><span class="stripe"></span><span class="ba">${b.author}</span></div>
-            <p class="book-cap">${b.note}<br><span class="sub">${b.title.toLowerCase()} · ${b.author.toLowerCase()}</span></p>
+            <img class="book" src="${b.cover}" alt="${b.title} by ${b.author}, cover">
         </div></div>`;
     },
     tennis: () => `<div class="pv pv-tennis"><canvas></canvas><p class="pv-note">${canHover ? 'move your mouse' : 'drag'} to play</p></div>`,
@@ -105,6 +106,7 @@ function render() {
         panel.innerHTML = VIEWS[key]();
         shownKey = key;
         if (key === 'tennis') startTennis($('canvas', panel));
+        if (key === 'music') mountSpotify(panel);
     }
     panel.classList.add('show');
     if (key === 'grubhub' && !bounced && !document.body.classList.contains('expanded')) {
@@ -123,14 +125,22 @@ const isExpanded = () => document.body.classList.contains('expanded');
 
 /* ── HOVER ── */
 links.forEach(l => {
+    /* Hover intent: with nothing showing, a word opens its panel at once.
+       With a panel already up, another word only takes over if the cursor
+       rests on it, so crossing words on the way to the panel doesn't
+       swap it (longer wait when the panel was clicked to stay). */
     l.addEventListener('pointerenter', e => {
         if (e.pointerType !== 'mouse' || isExpanded()) return;
         clearTimeout(leaveTimer);
-        hoverKey = l.dataset.panel;
-        render();
+        clearTimeout(switchTimer);
+        const k = l.dataset.panel, showing = hoverKey || pinKey;
+        const go = () => { hoverKey = k; render(); };
+        if (!showing || showing === k) go();
+        else switchTimer = setTimeout(go, pinKey ? 180 : 150); // crossing a word takes ~30–100ms
     });
     l.addEventListener('pointerleave', e => {
         if (e.pointerType !== 'mouse') return;
+        clearTimeout(switchTimer);
         leaveTimer = setTimeout(() => { hoverKey = null; render(); }, 180);
     });
     l.addEventListener('focus', () => { if (!isExpanded() && !isMobile()) { hoverKey = l.dataset.panel; render(); } });
@@ -146,7 +156,7 @@ links.forEach(l => {
         render();
     });
 });
-panel.addEventListener('pointerenter', () => clearTimeout(leaveTimer));
+panel.addEventListener('pointerenter', () => { clearTimeout(leaveTimer); clearTimeout(switchTimer); });
 panel.addEventListener('pointerleave', e => {
     if (e.pointerType !== 'mouse') return;
     leaveTimer = setTimeout(() => { hoverKey = null; render(); }, 180);
@@ -157,8 +167,8 @@ panel.addEventListener('click', e => {
     e.stopPropagation();
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'toggle-expand') { setExpanded(!isExpanded()); return; }
-    if (act === 'play') { togglePlayer(); return; }
-    if (act === 'rew') { playerPos = 0; tickPlayer(); return; }
+    if (act === 'play') { togglePlayer(panel); return; }
+    if (act === 'rew') { restartSong(panel); return; }
 
     if (shownKey === 'grubhub') {
         if (!isExpanded()) { e.preventDefault(); setExpanded(true); return; }
@@ -245,25 +255,59 @@ shortcut(['Esc'], 'close / back', () => {
     else { pinKey = null; hoverKey = null; render(); }
 });
 
-/* ── MUSIC (visual only for now) ── */
-let playerTimer = null, playerPos = 0;
-const SONG_LEN = HOBBIES.music.length;
-function tickPlayer(root = playerRoot) {
-    const p = $('.player', root);
-    if (!p) { clearInterval(playerTimer); playerTimer = null; return; }
-    $('.bar i', p).style.width = (playerPos / SONG_LEN * 100) + '%';
-    $('.cur', p).textContent = `${Math.floor(playerPos / 60)}:${String(Math.floor(playerPos % 60)).padStart(2, '0')}`;
+/* ── MUSIC ──
+   The record player is the design; Spotify's embed (a slim bar under it,
+   which their terms say must stay visible) does the actual playing. Its
+   iFrame API reports playback, so the record spins, the bar fills and the
+   clock ticks only while the song really plays. The API script loads the
+   first time the music panel opens, not on page load. */
+let spotApi = null, spotWaiting = null;
+let spot = null; // { ctrl, root } for the embed currently on screen
+function loadSpotify(cb) {
+    if (spotApi) return cb(spotApi);
+    if (spotWaiting) { spotWaiting.push(cb); return; }
+    spotWaiting = [cb];
+    window.onSpotifyIframeApiReady = api => { spotApi = api; spotWaiting.splice(0).forEach(f => f(api)); };
+    const s = document.createElement('script');
+    s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+    s.async = true;
+    document.head.append(s);
 }
-let playerRoot = panel;
-function togglePlayer(root = panel) {
-    playerRoot = root;
+function mountSpotify(root) {
+    const host = $('[data-spot]', root);
+    if (!host) return;
+    loadSpotify(api => {
+        if (!host.isConnected) return; // panel changed before the API arrived
+        api.createController(host, { uri: HOBBIES.music.spotify, width: '100%', height: 80 }, ctrl => {
+            spot = { ctrl, root };
+            // the API has no theme option; the embed's own theme=0 (dark) suits the site better than album colours
+            const f = $('iframe', root);
+            if (f && !f.src.includes('theme=')) f.src += '&theme=0';
+            ctrl.addListener('playback_update', e => syncPlayer(root, e.data));
+        });
+    });
+}
+const clock = ms => { const t = Math.floor(ms / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+function syncPlayer(root, d) {
     const p = $('.player', root);
-    const on = !p.classList.contains('playing');
+    if (!p) return;
+    const on = !d.isPaused;
     p.classList.toggle('playing', on);
     $('.play', p).textContent = on ? '❚❚' : '▶';
-    clearInterval(playerTimer);
-    if (on) playerTimer = setInterval(() => { playerPos = (playerPos + 1) % SONG_LEN; tickPlayer(root); }, 1000);
+    $('.play', p).setAttribute('aria-label', on ? 'Pause' : 'Play');
+    if (d.duration) {
+        $('.bar i', p).style.width = (d.position / d.duration * 100) + '%';
+        $('.times span:last-child', p).textContent = clock(d.duration);
+    }
+    $('.cur', p).textContent = clock(d.position);
 }
+const liveSpot = root => spot && spot.root === root && $('iframe', root) ? spot.ctrl : null;
+function togglePlayer(root) {
+    const ctrl = liveSpot(root);
+    if (ctrl) ctrl.togglePlay();
+    else toast('player is still loading');
+}
+function restartSong(root) { liveSpot(root)?.seek(0); }
 
 /* ── TENNIS (atari-style pong) ── */
 function startTennis(cv) {
@@ -342,6 +386,7 @@ function showMobile(k) {
     mdetail.hidden = false;
     mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
     if (k === 'tennis') startTennis($('canvas', mdetail));
+    if (k === 'music') mountSpotify(mdetail);
     mdetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 mdetail.addEventListener('click', e => {
@@ -349,7 +394,7 @@ mdetail.addEventListener('click', e => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'mreturn') { showMobile(null); return; }
     if (act === 'play') { togglePlayer(mdetail); return; }
-    if (act === 'rew') { playerPos = 0; tickPlayer(mdetail); return; }
+    if (act === 'rew') { restartSong(mdetail); return; }
     const card = e.target.closest('.mcard');
     if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
 });

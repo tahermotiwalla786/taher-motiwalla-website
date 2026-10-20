@@ -135,8 +135,10 @@ const HOBBIES = {
     paint:  { type: 'image', note: 'painting', caption: ['painting', 'acrylic on canvas'], srcs: PAINTINGS },
     draw:   { type: 'image', note: 'drawing',  caption: ['drawing', 'sketchbook'],        srcs: DRAWINGS },
     photo:  { type: 'image', note: 'photo',    caption: ['photo', 'shot on film'],        srcs: PHOTOS },
-    music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 271, caption: ['on repeat', 'pain · 2pac'] },
-    book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn', caption: ['reading rn', 'the savage detectives'] },
+    music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 274, caption: ['on repeat', 'pain · 2pac'],
+              spotify: 'spotify:track:0YYLatZXRuNdjgu1Hduwry' /* Above the Rim soundtrack, 1994 */ },
+    book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn', caption: ['reading rn', 'the savage detectives'],
+              cover: 'assets/img/savage-detectives.jpg' /* Picador 2008, via Open Library */ },
     tennis: { type: 'tennis', caption: ['tennis', 'drag to play'] },
     brooklyn: { type: 'map', caption: ['brooklyn, ny', 'map coming soon'] },
 };
