@@ -55,6 +55,7 @@ body.home { overflow: hidden; }
     display: grid; place-items: center;
     border-radius: 4px;
     font-size: 16px;
+    line-height: 1; /* script fonts' tall metrics pushed अ / اردو below EN */
     transition: background-color .2s;
 }
 .lang button.on { background: var(--surface); }
@@ -67,7 +68,9 @@ body.home { overflow: hidden; }
     position: absolute;
     top: var(--pad-y); right: var(--pad-x);
     z-index: 5;
+    transition: transform .25s var(--spring), background-color .4s var(--ease), opacity .3s var(--ease);
 }
+.expanded .theme-toggle { opacity: 0; pointer-events: none; }
 
 /* ── PANEL ──
    The panel is always laid out at its expanded size. When collapsed,
@@ -90,7 +93,8 @@ body.home { overflow: hidden; }
     transition:
         opacity .3s var(--ease),
         transform .45s var(--spring),
-        clip-path .65s var(--ease-x);
+        clip-path .65s var(--ease-x),
+        left .65s var(--ease-x), right .65s var(--ease-x), height .65s var(--ease-x);
 }
 .panel::before { /* the brown card */
     content: ''; position: absolute; inset: 0;
@@ -105,7 +109,12 @@ body.home { overflow: hidden; }
     35% { transform: translateX(-14px); }
     65% { transform: translateX(4px); }
 }
-.expanded .panel { clip-path: inset(0 0 0 0 round 36px); }
+.expanded .panel {
+    clip-path: inset(0 0 0 0 round 36px);
+    /* same gap on all four sides; no toggle to make room for */
+    left: var(--pad-y); right: var(--pad-y);
+    height: calc(100% - 2 * var(--pad-y));
+}
 
 .pv {
     position: absolute; top: 0; bottom: 0; right: 0;
@@ -137,43 +146,104 @@ body.home { overflow: hidden; }
 .pill-swap .when-open { opacity: 0; transform: translateY(6px); }
 .expanded .pill-swap .when-open { opacity: 1; transform: none; }
 .expanded .pill-swap .when-closed { opacity: 0; transform: translateY(-6px); }
+/* the hidden label stops taking up width, so "return" isn't padded out to "see more" */
+.pill-swap .when-open, .expanded .pill-swap .when-closed { position: absolute; left: 0; top: 0; }
+.expanded .pill-swap .when-open { position: static; }
 
 /* Phones are the same size in both states: as tall as the panel
-   allows after the pill (top) and captions (bottom). */
+   allows after the pill (top) and the hover title (bottom).
+   Expanded, they spread to fill the panel; with more projects than fit
+   it's a carousel and phones run off the edges. A hovered phone never
+   moves sideways; the phones after it slide right (--push) to make room
+   for its buttons, past the edge if need be. */
 .cards {
+    --edge: clamp(48px, 5cqw, 80px);
+    --ph: calc(100cqh - 96px - 64px); /* top: pill · bottom: title */
+    --pw: calc(var(--ph) * 402 / 874);
+    --edge-r: max(var(--edge), 76px); /* the last phone's buttons always fit: 24 gap + 36 button + 16 */
+    --push: 40px;
     position: absolute;
-    left: 0; right: 0; top: 96px;
+    left: 0; right: 0; top: 72px;
     display: flex; gap: 48px;
-    padding: 0 48px;
+    padding: 24px var(--edge-r) 0 var(--edge); /* top room so a lifted phone isn't clipped */
     overflow-x: hidden;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
+    transition: gap .65s var(--ease-x);
 }
 .cards::-webkit-scrollbar { display: none; }
-.expanded .cards { overflow-x: auto; }
-.cards::after { content: ''; flex: 0 0 1px; } /* end padding for scroll */
+.expanded .cards {
+    overflow-x: auto;
+    /* spread edge to edge; with too many projects to fit, fall back to 48px and scroll */
+    gap: max(48px, (100cqw - var(--edge) - var(--edge-r) - var(--n) * var(--pw)) / max(1, var(--n) - 1));
+}
 
 .card {
-    --ph: calc(100cqh - 96px - 96px); /* top: pill · bottom: 2-line caption */
+    --lift: -20px;
+    position: relative;
     flex: 0 0 auto;
-    width: calc(var(--ph) * 306 / 620); /* card is as wide as its phone */
-    display: flex; flex-direction: column; gap: 16px;
     scroll-snap-align: start;
-    scroll-margin-left: 48px;
-    text-decoration: none;
+    scroll-margin-left: var(--edge);
+    transition: transform .45s var(--ease-x);
 }
+.card-main { width: var(--pw); display: flex; flex-direction: column; gap: 16px; text-decoration: none; }
 .card .phone {
+    z-index: 1;
     height: var(--ph);
-    border-radius: 34px;
-    transition: transform .35s var(--spring), background-color .4s;
+    transition: transform .4s var(--spring), background-color .4s;
 }
-.expanded .card:hover .phone { transform: translateY(-6px); }
-.card-meta { display: flex; align-items: flex-start; gap: 8px; padding: 0 6px; }
-.card-meta .pill { font-size: 14px; padding: 6px 8px; }
-.card-meta .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; text-transform: lowercase; }
-.card-meta .t { font-size: 16px; font-weight: 700; }
-.card-meta .tags { display: flex; flex-wrap: nowrap; overflow: hidden; gap: 0 8px; font-size: 14px; font-weight: 300; }
-.card-meta .tags span { white-space: nowrap; }
+/* hover: the phone lifts and the title slides out from under it */
+.card-meta {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 0 6px;
+    opacity: 0; transform: translateY(-20px);
+    transition: opacity .25s var(--ease), transform .4s var(--spring);
+}
+.card:hover .phone, .card:focus-within .phone { transform: translateY(var(--lift)); }
+.card:hover .card-meta, .card:focus-within .card-meta { opacity: 1; transform: translateY(-8px); }
+.card-meta .logo { width: 24px; height: 24px; border-radius: 4.8px; object-fit: cover; flex-shrink: 0; }
+.card-meta .t { font-size: 16px; font-weight: 700; text-transform: lowercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* make room: phones after the hovered one slide right */
+.expanded .card:is(:hover, :focus-within) ~ .card { transform: translateX(var(--push)); }
+
+/* side buttons (expanded only): read the case study · request details.
+   The 24px spacer is part of the box, so moving to the buttons keeps the hover. */
+.card-acts {
+    position: absolute; top: 0; left: 100%;
+    width: 60px; height: var(--ph);
+    display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 48px;
+    opacity: 0; visibility: hidden;
+    transform: translate(-8px, var(--lift));
+    transition: opacity .2s var(--ease), transform .35s var(--spring), visibility 0s .2s;
+}
+.expanded .card:is(:hover, :focus-within) .card-acts {
+    opacity: 1; visibility: visible;
+    transform: translate(0, var(--lift));
+    transition: opacity .2s var(--ease) .1s, transform .35s var(--spring) .1s, visibility 0s;
+}
+.act {
+    width: 36px; height: 36px; flex-shrink: 0;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    color: var(--fg);
+    transition: background-color .2s, transform .2s var(--spring);
+}
+.act .i { width: 24px; height: 24px; }
+.act:hover, .act:focus-visible { background: var(--surface-2); }
+.act:active { transform: scale(.92); }
+
+/* request-details dialog */
+.req { display: grid; gap: 16px; padding: 24px 32px 32px; }
+.req > p { font-size: 14px; font-weight: 300; color: var(--fg-muted); text-transform: lowercase; }
+.req label { display: grid; gap: 8px; font-size: 14px; text-transform: lowercase; }
+.req input, .req textarea {
+    width: 100%; padding: 12px 14px;
+    background: none; border: 1px solid var(--line); border-radius: 0; outline: 0;
+    font-size: 14px; resize: vertical;
+}
+.req input:focus, .req textarea:focus { border-style: dashed; }
+.req .send { justify-self: end; font-size: 14px; }
 
 /* ── MUSIC ── */
 .player {
@@ -270,14 +340,14 @@ body.home { overflow: hidden; }
 .mcap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px; }
 .mcap .txt { display: flex; flex-direction: column; gap: 2px; text-transform: lowercase; font-size: 14px; }
 .mcap .txt span { font-weight: 300; font-size: 13px; }
-.mcap .pill { font-size: 14px; padding: 7px 9px; }
+.mcap.proj { justify-content: flex-start; gap: 8px; }
+.mcap .logo { width: 32px; height: 32px; border-radius: 6.67px; object-fit: cover; flex-shrink: 0; }
 .mcards { display: flex; flex-direction: column; gap: 24px; }
 .mcard { display: flex; flex-direction: column; gap: 16px; text-decoration: none; animation: m-in .5s var(--ease) both; animation-delay: calc(var(--i) * 60ms); }
 .mcard .mbox .phone {
     position: absolute; left: 50%; top: 15.6%;
     width: 79.5%; height: auto;
     transform: translateX(-50%);
-    border-radius: 26px;
     transition: transform .35s var(--spring);
 }
 .mcard:active .mbox .phone { transform: translateX(-50%) translateY(-6px); }

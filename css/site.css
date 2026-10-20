@@ -74,6 +74,8 @@ img, video { display: block; }
 .i-back    { --src: url(../assets/icons/arrow-left.svg); }
 .i-expand  { --src: url(../assets/icons/expand.svg); }
 .i-return  { --src: url(../assets/icons/return.svg); }
+.i-book    { --src: url(../assets/icons/book.svg); }
+.i-chat    { --src: url(../assets/icons/chat.svg); }
 
 .circle-btn {
     width: 48px; height: 48px;
@@ -111,8 +113,8 @@ img, video { display: block; }
 /* ── PHONE (video / image / placeholder) ── */
 .phone {
     position: relative;
-    aspect-ratio: 306 / 620;
-    border-radius: 11.76% / 5.8%;
+    aspect-ratio: 402 / 874; /* iPhone 17 (402×874 pt) */
+    border-radius: 15.4% / 7.1%; /* ~62pt display corners */
     background: var(--phone);
     overflow: hidden;
     transition: background-color .4s var(--ease);

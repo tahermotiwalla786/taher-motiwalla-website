@@ -65,7 +65,7 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
     --lift: cubic-bezier(.34, 1.4, .64, 1);
 }
 .slot .phone {
-    height: 100%; border-radius: 36px;
+    height: 100%;
     box-shadow: 0 30px 60px rgba(0,0,0,.35);
     transition: transform .55s var(--lift);
 }
@@ -278,7 +278,6 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
     .stage-media { flex: 1; height: auto; }
     .phones { inset: 16px 0 68px; }            /* bottom room for the scrubber (+16px sheet overlap) */
     .slot { height: 100%; }
-    .slot .phone { border-radius: 27px; }
     .slot.scrub-on .phone { transform: none; } /* mobile: scrubber has its own room */
     .scrubber { top: calc(100% + 14px); }
 

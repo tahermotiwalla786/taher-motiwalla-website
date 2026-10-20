@@ -131,7 +131,7 @@ function mediaHTML(m, { autoplay = true, placeholder = 'video coming soon' } = {
     if (!m) return `<div class="phone-ph">${placeholder}</div>`;
     if (m.type === 'image') return `<img src="${m.src}" alt="" loading="lazy">`;
     const srcs = [].concat(m.src);
-    return `<video src="${srcs[0]}" data-playlist="${srcs.join('|')}" muted playsinline preload="metadata" ${autoplay ? 'autoplay' : ''} ${srcs.length > 1 ? '' : 'loop'}></video>`;
+    return `<video src="${srcs[0]}" data-playlist="${srcs.join('|')}" muted playsinline preload="${autoplay ? 'metadata' : 'auto'}" ${autoplay ? 'autoplay' : ''} ${srcs.length > 1 ? '' : 'loop'}></video>`;
 }
 /* Videos with several sources play one after another, then loop. */
 document.addEventListener('ended', e => {

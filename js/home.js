@@ -22,21 +22,24 @@ let bounced = false;
 const VIEWS = {
     grubhub() {
         const cards = PROJECTS.map(p => `
-            <a class="card" href="project.html?p=${p.slug}" data-slug="${p.slug}">
-                <div class="phone">${mediaHTML(p.cover, { placeholder: p.title + '<br>coming soon' })}</div>
-                <div class="card-meta">
-                    <div class="txt"><span class="t">${p.title}</span><span class="tags">${p.cardTags.map(t => `<span>${t}</span>`).join('')}</span></div>
-                    <span class="pill">see more</span>
+            <div class="card" data-slug="${p.slug}">
+                <a class="card-main" href="project.html?p=${p.slug}">
+                    <div class="phone">${mediaHTML(p.cover, { autoplay: !canHover, placeholder: p.title + '<br>coming soon' })}</div>
+                    <div class="card-meta"><img class="logo" src="${p.logo}" alt=""><span class="t">${p.title}</span></div>
+                </a>
+                <div class="card-acts">
+                    <a class="act" href="project.html?p=${p.slug}" aria-label="Read the ${p.title} case study"><span class="i i-book"></span></a>
+                    <button class="act" data-act="request" aria-label="Request details on ${p.title}"><span class="i i-chat"></span></button>
                 </div>
-            </a>`).join('');
+            </div>`).join('');
         return `<div class="pv pv-work">
             <button class="pill top-pill" data-act="toggle-expand">
                 <span class="pill-swap">
                     <span class="when-closed">see more <span class="i i-expand"></span></span>
-                    <span class="when-open">back home <span class="i i-return"></span></span>
+                    <span class="when-open">return <span class="i i-return"></span></span>
                 </span>
             </button>
-            <div class="cards">${cards}</div>
+            <div class="cards" style="--n:${PROJECTS.length}">${cards}</div>
         </div>`;
     },
     brooklyn: () => `<div class="pv pv-note"><span>stylized map of brooklyn</span><span class="sub">pins of places i've been to lately, coming soon</span></div>`,
@@ -142,9 +145,11 @@ panel.addEventListener('click', e => {
     if (act === 'rew') { playerPos = 0; tickPlayer(); return; }
 
     if (shownKey === 'grubhub') {
-        const card = e.target.closest('.card');
         if (!isExpanded()) { e.preventDefault(); setExpanded(true); return; }
-        if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
+        const card = e.target.closest('.card');
+        if (act === 'request') { openRequest(PROJECTS.find(p => p.slug === card.dataset.slug)); return; }
+        const link = e.target.closest('a');
+        if (link) { e.preventDefault(); requireUnlock(() => location.href = link.href); }
         return;
     }
     // any other panel: a click pins it
@@ -157,6 +162,48 @@ document.addEventListener('click', e => {
     if (isExpanded()) return;
     if (pinKey) { pinKey = null; hoverKey = null; render(); }
 });
+
+/* project videos sit on their first frame until hovered */
+panel.addEventListener('pointerover', e => {
+    const v = e.target.closest('.card')?.querySelector('video');
+    if (v && e.pointerType === 'mouse') v.play().catch(() => {});
+});
+panel.addEventListener('pointerout', e => {
+    const card = e.target.closest('.card');
+    if (!card || card.contains(e.relatedTarget)) return;
+    $('video', card)?.pause();
+});
+
+/* ── REQUEST DETAILS ──
+   No backend: Send opens a pre-filled email in the visitor's mail app. */
+function openRequest(p) {
+    let o = $('#request');
+    if (!o) {
+        o = document.createElement('div');
+        o.className = 'overlay'; o.id = 'request'; o.setAttribute('aria-hidden', 'true');
+        o.innerHTML = `<div class="sheet" role="dialog" aria-label="Request details">
+            <div class="sheet-head">Request <button data-close aria-label="Close"><span class="i i-close"></span></button></div>
+            <form class="req">
+                <p class="req-for"></p>
+                <label>name<input name="name" autocomplete="name" required></label>
+                <label>email<input name="email" type="email" autocomplete="email" required></label>
+                <label>note<textarea name="note" rows="4" placeholder="what would you like to know?"></textarea></label>
+                <button class="pill send" type="submit">send</button>
+            </form></div>`;
+        document.body.append(o);
+    }
+    const form = $('form', o);
+    $('.req-for', o).textContent = `more details and the full case study for ${p.title.toLowerCase()}. send opens your email app.`;
+    form.onsubmit = e => {
+        e.preventDefault();
+        const f = new FormData(form);
+        const body = `${f.get('note') || 'I\'d love to see the full case study.'}\n\n${f.get('name')}\n${f.get('email')}`;
+        location.href = `${LINKS.email}?subject=${encodeURIComponent('Case study request: ' + p.title)}&body=${encodeURIComponent(body)}`;
+        closeOverlay(o);
+        toast('opening your email app');
+    };
+    openOverlay(o);
+}
 
 /* horizontal scroll with a normal mouse wheel */
 panel.addEventListener('wheel', e => {
@@ -172,7 +219,7 @@ $$('.lang [data-soon]').forEach(b => b.addEventListener('click', () => toast(`${
 function scrollCards(dir) {
     const row = $('.cards', panel);
     if (!row) return;
-    const step = $('.card', row).offsetWidth + 48;
+    const step = $('.card-main', row).offsetWidth + 48;
     row.scrollBy({ left: dir * step, behavior: 'smooth' });
 }
 shortcut(['P'], 'projects', () => setExpanded(!isExpanded()));
@@ -257,7 +304,7 @@ function mobileWork() {
     return `<div class="mcards">${PROJECTS.map((p, i) => `
         <a class="mcard" href="project.html?p=${p.slug}" style="--i:${i}">
             <div class="mbox"><div class="phone">${mediaHTML(p.cover, { placeholder: p.title + '<br>coming soon' })}</div></div>
-            <div class="mcap"><div class="txt"><b>${p.title}</b><span>${p.cardTags.join('  ')}</span></div><span class="pill">see more</span></div>
+            <div class="mcap proj"><img class="logo" src="${p.logo}" alt=""><div class="txt"><b>${p.title}</b></div></div>
         </a>`).join('')}</div>`;
 }
 function showMobile(k) {
