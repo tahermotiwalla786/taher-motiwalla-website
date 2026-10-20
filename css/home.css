@@ -306,6 +306,27 @@ body.home { overflow: hidden; }
 }
 .book:hover { transform: translateY(-4px); }
 
+/* ── BROOKLYN MAP ── */
+.pv-map .bk-wrap { position: absolute; inset: 32px 32px 64px; }
+.bk-map { width: 100%; height: 100%; display: block; overflow: visible; }
+.bk-map .nb {
+    fill: transparent;
+    stroke: var(--fg); stroke-opacity: .28; stroke-width: .8;
+    vector-effect: non-scaling-stroke;
+    transition: fill .2s, stroke-opacity .2s;
+    cursor: crosshair;
+}
+.bk-map .nb.park { fill: var(--fg-faint); }               /* parks, cemeteries, airport */
+.bk-map .nb:hover { fill: var(--accent-bg); stroke: var(--accent); stroke-opacity: 1; }
+.bk-map .outline { fill: none; stroke: var(--fg); stroke-width: 1.5; vector-effect: non-scaling-stroke; pointer-events: none; }
+.bk-hood, .bk-temp { position: absolute; bottom: 24px; font-size: 14px; text-transform: lowercase; }
+.bk-hood { left: 32px; font-weight: 300; color: var(--accent); }
+.bk-temp { right: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mbox .pv-map .bk-wrap { inset: 12px 12px 40px; }
+.mbox .bk-hood, .mbox .bk-temp { bottom: 12px; font-size: 12px; }
+.mbox .bk-hood { left: 12px; }
+.mbox .bk-temp { right: 12px; }
+
 /* ── TENNIS ── */
 .pv-tennis canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* a chip over the court, so the dashed net line doesn't run through the text */

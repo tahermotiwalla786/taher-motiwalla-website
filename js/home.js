@@ -43,7 +43,9 @@ const VIEWS = {
             <div class="cards" style="--n:${PROJECTS.length}">${cards}</div>
         </div>`;
     },
-    brooklyn: () => `<div class="pv pv-note"><span>stylized map of brooklyn</span><span class="sub">pins of places i've been to lately, coming soon</span></div>`,
+    brooklyn: () => `<div class="pv pv-map"><div class="bk-wrap"></div>
+        <div class="bk-hood">&nbsp;</div>
+        <div class="bk-temp" aria-label="Temperature in Brooklyn now"></div></div>`,
     paint: () => imageView('paint'),
     draw: () => imageView('draw'),
     photo: () => imageView('photo'),
@@ -107,6 +109,7 @@ function render() {
         shownKey = key;
         if (key === 'tennis') startTennis($('canvas', panel));
         if (key === 'music') mountSpotify(panel);
+        if (key === 'brooklyn') mountMap(panel);
     }
     panel.classList.add('show');
     if (key === 'grubhub' && !bounced && !document.body.classList.contains('expanded')) {
@@ -309,6 +312,39 @@ function togglePlayer(root) {
 }
 function restartSong(root) { liveSpot(root)?.seek(0); }
 
+/* ── BROOKLYN ──
+   Line map from NYC Open Data (borough + 2020 neighborhood boundaries),
+   built into assets/img/brooklyn.svg. Hovering names the neighborhood;
+   the corner shows Brooklyn's temperature right now (National Weather
+   Service hourly forecast: free, no key, public domain). Both load on
+   first open; the temperature is fetched once per visit. */
+let mapSVG = null, tempReq = null;
+const NWS_HOURLY = 'https://api.weather.gov/gridpoints/OKX/36,39/forecast/hourly'; // central Brooklyn
+function brooklynTemp() {
+    tempReq ||= fetch(NWS_HOURLY).then(r => r.json()).then(d => {
+        const p = d.properties.periods[0];
+        return `${p.temperature}°${p.temperatureUnit.toLowerCase()}`;
+    }).catch(() => (tempReq = null, ''));
+    return tempReq;
+}
+function mountMap(root) {
+    const wrap = $('.bk-wrap', root);
+    if (!wrap) return;
+    brooklynTemp().then(t => { const el = $('.bk-temp', root); if (el) el.textContent = t; });
+    const ready = mapSVG ? Promise.resolve(mapSVG)
+        : fetch('assets/img/brooklyn.svg').then(r => r.text()).then(t => (mapSVG = t));
+    ready.then(svgText => {
+        if (!wrap.isConnected) return;
+        wrap.innerHTML = svgText;
+        const svg = $('svg', wrap), hood = $('.bk-hood', root);
+        svg.addEventListener('pointermove', e => {
+            const nb = e.target.closest('.nb');
+            hood.textContent = nb ? nb.dataset.name : '\u00a0';
+        });
+        svg.addEventListener('pointerleave', () => { hood.textContent = '\u00a0'; });
+    }).catch(() => { wrap.textContent = 'map failed to load'; });
+}
+
 /* ── TENNIS (atari-style pong) ── */
 function startTennis(cv) {
     const ctx = cv.getContext('2d');
@@ -387,6 +423,7 @@ function showMobile(k) {
     mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
     if (k === 'tennis') startTennis($('canvas', mdetail));
     if (k === 'music') mountSpotify(mdetail);
+    if (k === 'brooklyn') mountMap(mdetail);
     mdetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 mdetail.addEventListener('click', e => {
