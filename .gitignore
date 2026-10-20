@@ -17,3 +17,7 @@ videos/
 BACKUP_*.tar.gz
 .write-test
 .claude/
+
+# HEIC originals stay local; the site uses the converted JPGs
+*.HEIC
+*.heic

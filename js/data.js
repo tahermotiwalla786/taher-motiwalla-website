@@ -100,13 +100,41 @@ const PROJECTS = [
     },
 ];
 
-/* Home-page hover panels. Drop files into assets/hobbies/
-   with these names and they'll show up automatically. */
+/* Home-page hover panels. Paint, draw and photo show a random
+   image from their list on each hover (web-sized JPGs; the HEIC
+   originals stay local). Add a path here to add an image. */
+const PAINTINGS = [
+    'assets/hobbies/paintings/IMG_0608.jpg',
+    'assets/hobbies/paintings/IMG_5532.jpg',
+    'assets/hobbies/paintings/IMG_7021.jpg',
+    'assets/hobbies/paintings/IMG_7054.jpg',
+    'assets/hobbies/paintings/IMG_8333.jpg',
+];
+const DRAWINGS = [
+    'assets/hobbies/drawings/IMG_5110.jpg',
+];
+const PHOTOS = [
+    'assets/hobbies/photos/IMG_0846.jpg',
+    'assets/hobbies/photos/IMG_1209.jpg',
+    'assets/hobbies/photos/IMG_1238.jpg',
+    'assets/hobbies/photos/IMG_1798.jpg',
+    'assets/hobbies/photos/IMG_6793.jpg',
+    'assets/hobbies/photos/IMG_7079.jpg',
+    'assets/hobbies/photos/IMG_8398.jpg',
+    'assets/hobbies/photos/IMG_8505.jpg',
+    'assets/hobbies/photos/IMG_8665.jpg',
+    'assets/hobbies/photos/IMG_8711.jpg',
+    'assets/hobbies/photos/IMG_8769.jpg',
+    'assets/hobbies/photos/IMG_8817.jpg',
+    'assets/hobbies/photos/IMG_8852.jpg',
+    'assets/hobbies/photos/IMG_8895.jpg',
+];
+
 const HOBBIES = {
     /* caption = the header / subtitle shown under the card on mobile */
-    paint:  { type: 'image', src: 'assets/hobbies/paint.jpg',  note: 'painting goes here', caption: ['painting', 'acrylic on canvas'] },
-    draw:   { type: 'image', src: 'assets/hobbies/draw.jpg',   note: 'drawing goes here',  caption: ['drawing', 'sketchbook'] },
-    photo:  { type: 'image', src: 'assets/hobbies/photo.jpg',  note: 'photo goes here',    caption: ['photo', 'shot on film'] },
+    paint:  { type: 'image', note: 'painting', caption: ['painting', 'acrylic on canvas'], srcs: PAINTINGS },
+    draw:   { type: 'image', note: 'drawing',  caption: ['drawing', 'sketchbook'],        srcs: DRAWINGS },
+    photo:  { type: 'image', note: 'photo',    caption: ['photo', 'shot on film'],        srcs: PHOTOS },
     music:  { type: 'music', song: 'Pain', artist: '2Pac', length: 271, caption: ['on repeat', 'pain · 2pac'] },
     book:   { type: 'book',  title: 'The Savage Detectives', author: 'Roberto Bolaño', note: 'reading rn', caption: ['reading rn', 'the savage detectives'] },
     tennis: { type: 'tennis', caption: ['tennis', 'drag to play'] },

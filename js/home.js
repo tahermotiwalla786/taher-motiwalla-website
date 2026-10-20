@@ -43,9 +43,9 @@ const VIEWS = {
         </div>`;
     },
     brooklyn: () => `<div class="pv pv-note"><span>stylized map of brooklyn</span><span class="sub">pins of places i've been to lately, coming soon</span></div>`,
-    paint: () => imageView(HOBBIES.paint),
-    draw: () => imageView(HOBBIES.draw),
-    photo: () => imageView(HOBBIES.photo),
+    paint: () => imageView('paint'),
+    draw: () => imageView('draw'),
+    photo: () => imageView('photo'),
     music: () => {
         const m = HOBBIES.music;
         return `<div class="pv"><div class="player">
@@ -66,8 +66,24 @@ const VIEWS = {
     tennis: () => `<div class="pv pv-tennis"><canvas></canvas><p class="pv-note">${canHover ? 'move your mouse' : 'drag'} to play</p></div>`,
 };
 
-function imageView(h) {
-    return `<div class="pv pv-img"><img src="${h.src}" alt="${h.note}" onerror="this.parentNode.outerHTML='<div class=&quot;pv pv-note&quot;><span>${h.note}</span><span class=&quot;sub&quot;>add ${h.src}</span></div>'"></div>`;
+/* Each hover shows a different image: a shuffled deck per hobby, so
+   every image comes up once before any repeats. A clicked (pinned)
+   panel keeps the image it was showing. */
+const decks = {}, picks = {};
+function nextImage(key) {
+    const all = HOBBIES[key].srcs;
+    if (!decks[key]?.length) {
+        decks[key] = [...all].sort(() => Math.random() - .5);
+        if (all.length > 1 && decks[key][0] === picks[key]) decks[key].push(decks[key].shift()); // no repeat across decks
+    }
+    picks[key] = decks[key].shift();
+    if (decks[key][0]) new Image().src = decks[key][0]; // warm the next one
+    return picks[key];
+}
+function imageView(key) {
+    const h = HOBBIES[key];
+    const src = key === pinKey && picks[key] ? picks[key] : nextImage(key);
+    return `<div class="pv pv-img"><img src="${src}" alt="${h.note}"></div>`;
 }
 
 /* ── SHOW / HIDE ── */

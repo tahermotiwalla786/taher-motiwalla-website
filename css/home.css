@@ -133,8 +133,8 @@ body.home { overflow: hidden; }
 }
 .pv-note .sub { color: var(--fg-muted); }
 
-/* image hobby */
-.pv-img img { width: 100%; height: 100%; object-fit: cover; }
+/* image hobby: fills the card (portrait images crop top and bottom) */
+.pv-img img { width: 100%; height: 100%; object-fit: cover; animation: pv-in .35s var(--ease); }
 
 /* ── GRUBHUB / PROJECTS ── */
 .pv-work .top-pill {
