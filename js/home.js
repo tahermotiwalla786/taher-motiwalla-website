@@ -242,7 +242,6 @@ panel.addEventListener('wheel', e => {
     row.scrollBy({ left: e.deltaY * 1.2 });
 }, { passive: false });
 
-$$('.lang [data-soon]').forEach(b => b.addEventListener('click', () => toast(`${b.lang === 'hi' ? 'हिन्दी' : 'اردو'} coming soon`)));
 
 /* ── SHORTCUTS ── */
 function scrollCards(dir) {

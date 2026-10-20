@@ -60,9 +60,25 @@ body.home { overflow: hidden; }
 }
 .lang button.on { background: var(--surface); }
 /* Devanagari and Urdu need a real script font; a monospace one breaks the letter joins */
-.lang .script { font-family: 'Noto Nastaliq Urdu', 'Noto Sans Devanagari', system-ui, sans-serif; }
+/* The chips use their own copies of just these letters (Noto, OFL; ~2KB in
+   assets/fonts), under their own names, so the full fonts that load when a
+   language is picked can't shift them. Nudges below are measured for these. */
+@font-face { font-family: 'Chip Devanagari'; src: url(../assets/fonts/chip-devanagari.woff2) format('woff2'); font-display: block; }
+@font-face { font-family: 'Chip Nastaliq'; src: url(../assets/fonts/chip-nastaliq.woff2) format('woff2'); font-display: block; }
+.lang [lang="hi"] { font-family: 'Chip Devanagari', system-ui, sans-serif; }
+.lang [lang="ur"] { font-family: 'Chip Nastaliq', system-ui, serif; }
+.lang [lang="hi"] .g { transform: translateY(1.5px); }
+.lang [lang="ur"] .g { transform: translateY(-3.6px); }
+.lang .g { display: block; }
 .nw { white-space: nowrap; }
-.lang button[data-soon]:hover { background: var(--fg-faint); }
+.lang button:not(.on):hover { background: var(--fg-faint); }
+/* translated bio: Latin letters stay in the mono, the script gets a proper font */
+.intro[lang="hi"], .previously .label[lang="hi"] { font-family: var(--mono), 'Noto Sans Devanagari', sans-serif; }
+.intro[lang="ur"], .previously .label[lang="ur"] { font-family: var(--mono), 'Noto Nastaliq Urdu', serif; }
+.intro[lang="ur"] p, .intro[lang="ur"] h1 { line-height: 2.1; } /* Nastaliq needs tall lines */
+.intro[lang="ur"] p, .intro[lang="ur"] .contact .ext:first-child { font-size: 18px; } /* and reads small at the mono size */
+.intro[lang="ur"] p + p { margin-top: 0; }
+.intro[lang="ur"] .contact { justify-content: flex-start; align-items: baseline; } /* ای میل and LinkedIn share a baseline */
 
 .theme-toggle {
     position: absolute;
