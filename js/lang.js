@@ -1,7 +1,7 @@
 /* ── LANGUAGE ────────────────────────────
-   EN / हिन्दी / اردو for the home-page bio. The highlighted words are
-   the same live buttons (their hover and click handlers stay put); only
-   their labels and the words around them change. Company and project
+   EN / हिन्दी / اردو for the home-page bio. The highlighted words and the
+   Grubhub link are the same live elements (their hover and click handlers
+   stay put); only their labels and the words around them change. Company and project
    names stay in English. Urdu flips only the text block to right-to-left,
    not the page. Fonts load the first time a script is picked.
    ──────────────────────────────────────── */
@@ -10,35 +10,45 @@ const LANG = {
     hi: {
         label: 'हिन्दी',
         name: 'ताहेर मोटीवाला',
-        p1: 'फ़िलहाल {grubhub} में डिज़ाइन कर रहा हूँ। {brooklyn} में रहता हूँ।',
-        p2: 'फ़ुर्सत में मुझे {paint}, {draw}, {photo}, {music}, {book}, और {tennis} पसंद है।',
-        words: { grubhub: 'Grubhub', brooklyn: 'ब्रुकलिन, NY', paint: 'पेंटिंग करना', draw: 'ड्रॉइंग करना', photo: 'फ़ोटो खींचना', music: 'गाने सुनना', book: 'किताब पढ़ना', tennis: 'टेनिस खेलना' },
+        p: [
+            'मैं एक प्रोडक्ट डिज़ाइनर हूँ और फ़िलहाल {gh} में काम कर रहा हूँ।',
+            'मेरा प्रोफ़ेशनल काम आप {grubhub} में देख सकते हैं।',
+            'या फिर मेरी खींची कुछ {photo} देख सकते हैं, जिनसे मुझे {draw} के लिए कुछ मिल जाता है, और कभी-कभी तो मैं उन्हें {paint} की कोशिश भी करता हूँ।',
+        ],
+        words: { grubhub: 'प्रोजेक्ट्स', photo: 'तस्वीरें', draw: 'ड्रॉ करने', paint: 'पेंट करने' },
         email: 'ईमेल', linkedin: 'LinkedIn', previously: 'पहले',
+        residing: 'ब्रुकलिन, NY में रहता हूँ।',
     },
     ur: {
         label: 'اردو', rtl: true,
         name: 'طاہر موٹی والا',
-        p1: 'فی الحال {grubhub} میں ڈیزائن کر رہا ہوں۔ {brooklyn} میں رہتا ہوں۔',
-        p2: 'فرصت میں مجھے {paint}، {draw}، {photo}، {music}، {book}، اور {tennis} پسند ہے۔',
-        words: { grubhub: 'Grubhub', brooklyn: 'بروکلین، NY', paint: 'پینٹنگ کرنا', draw: 'ڈرائنگ کرنا', photo: 'تصویر کھینچنا', music: 'موسیقی سننا', book: 'کتاب پڑھنا', tennis: 'ٹینس کھیلنا' },
+        p: [
+            'میں ایک پروڈکٹ ڈیزائنر ہوں اور فی الحال {gh} میں کام کر رہا ہوں۔',
+            'میرا پیشہ ورانہ کام آپ {grubhub} میں دیکھ سکتے ہیں۔',
+            'یا پھر میری کھینچی ہوئی کچھ {photo} دیکھ لیں، جن سے مجھے {draw} کے لیے کچھ مل جاتا ہے، اور کبھی کبھی تو میں انہیں {paint} کی کوشش بھی کرتا ہوں۔',
+        ],
+        words: { grubhub: 'پروجیکٹس', photo: 'تصویریں', draw: 'ڈرا کرنے', paint: 'پینٹ کرنے' },
         email: 'ای میل', linkedin: 'LinkedIn', previously: 'پہلے',
+        residing: 'بروکلین، NY میں رہتا ہوں۔',
     },
 };
 
 const intro = $('.intro');
-const [p1, p2] = $$('.intro > p');
+const paras = $$('.intro > p');
+const gh = $('.intro > p .ext'); // Grubhub ↗ stays a link in every language
 const L = {
-    h1: $('.intro h1'), p1, p2,
+    h1: $('.intro h1'),
     email: $('.contact .ext:nth-child(1)'), linkedin: $('.contact .ext:nth-child(2)'),
-    prev: $('.previously .label'),
+    prev: $('.previously .label'), residing: $('.residing'),
 };
 // English as written in index.html, kept to switch back
 const EN = {
-    h1: L.h1.textContent, email: L.email.textContent, linkedin: L.linkedin.textContent, prev: L.prev.textContent,
-    p1: [...p1.childNodes], p2: [...p2.childNodes],
+    h1: L.h1.textContent, email: L.email.textContent, linkedin: L.linkedin.textContent,
+    prev: L.prev.textContent, residing: L.residing.textContent,
+    p: paras.map(p => [...p.childNodes]),
     words: Object.fromEntries(links.map(b => [b.dataset.panel, b.textContent])),
 };
-const btn = k => links.find(b => b.dataset.panel === k);
+const tokenEl = k => k === 'gh' ? gh : links.find(b => b.dataset.panel === k);
 
 let fontsLoaded = false;
 function loadScriptFonts() {
@@ -54,35 +64,34 @@ function loadScriptFonts() {
 function fill(p, template) {
     p.replaceChildren(...template.split(/(\{\w+\})/).filter(Boolean).map(part => {
         const m = part.match(/^\{(\w+)\}$/);
-        return m ? btn(m[1]) : document.createTextNode(part);
+        return m ? tokenEl(m[1]) : document.createTextNode(part);
     }));
 }
 
 function setLang(code) {
     const t = LANG[code];
     if (t) loadScriptFonts();
-    intro.lang = t ? code : 'en';
-    intro.dir = t?.rtl ? 'rtl' : 'ltr';
-    L.prev.lang = intro.lang; L.prev.dir = intro.dir;
-    L.h1.textContent = t ? t.name : EN.h1;
-    L.email.textContent = t ? t.email : EN.email;
-    L.linkedin.textContent = t ? t.linkedin : EN.linkedin;
-    L.prev.textContent = t ? t.previously : EN.prev;
+    const lang = t ? code : 'en', dir = t?.rtl ? 'rtl' : 'ltr';
+    for (const el of [intro, L.prev, L.residing]) { el.lang = lang; el.dir = dir; }
+    for (const k of ['h1', 'email', 'linkedin', 'prev', 'residing']) {
+        const key = { h1: 'name', prev: 'previously' }[k] || k;
+        L[k].textContent = t ? t[key] : EN[k];
+    }
     links.forEach(b => { b.textContent = t ? t.words[b.dataset.panel] : EN.words[b.dataset.panel]; });
-    if (t) { fill(p1, t.p1); fill(p2, t.p2); }
+    if (t) paras.forEach((p, i) => fill(p, t.p[i]));
     else {
         // put each button back at the front of its nowrap span, then the original nodes
-        for (const nodes of [EN.p1, EN.p2]) nodes.forEach(n => {
-            if (n.classList?.contains('nw')) n.prepend(btn(n.dataset.k));
-        });
-        p1.replaceChildren(...EN.p1); p2.replaceChildren(...EN.p2);
+        EN.p.forEach(nodes => nodes.forEach(n => {
+            if (n.classList?.contains('nw')) n.prepend(tokenEl(n.dataset.k));
+        }));
+        paras.forEach((p, i) => p.replaceChildren(...EN.p[i]));
     }
     $$('.lang button').forEach(b => {
-        const on = (b.lang || 'en') === (t ? code : 'en');
+        const on = (b.lang || 'en') === lang;
         b.classList.toggle('on', on);
         b.setAttribute('aria-pressed', on);
     });
-    store.set('lang', t ? code : 'en');
+    store.set('lang', lang);
 }
 
 // remember which button each nowrap span holds, so English can be rebuilt

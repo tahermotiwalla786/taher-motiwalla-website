@@ -20,9 +20,9 @@ body.home { overflow: hidden; }
 .bio { transition-delay: .25s; }
 .bio-top { display: flex; flex-direction: column; gap: 48px; }
 .intro { display: flex; flex-direction: column; gap: 24px; }
-.intro h1 { font-size: 24px; font-weight: 700; }
-.intro p { font-size: 16px; line-height: normal; }
-.intro p + p { margin-top: -5px; } /* Figma uses a blank line, not a gap */
+.intro h1 { font-size: 24px; font-weight: 500; }
+.intro p { font-size: 16px; line-height: normal; margin-inline-end: -4px; } /* "…try to paint." is 399.5px: Figma fits it on one line, so a hair of slack */
+.intro p + p { margin-top: -6px; } /* Figma: paragraphs 1 blank line apart, 18px */
 
 .hl, .ext {
     text-decoration: underline;
@@ -35,26 +35,41 @@ body.home { overflow: hidden; }
 .hl { position: relative; cursor: pointer; }
 .hl:hover, .hl.active { text-decoration-thickness: 2px; }
 .hl.pinned { text-decoration-style: double; }
-.ext::after { content: ' ↗'; display: inline-block; text-decoration: none; margin-left: .35em; transition: transform .2s var(--spring); }
+.ext::after { content: '↗'; display: inline-block; font-family: var(--mono); text-decoration: none; margin-left: .3em; transition: transform .2s var(--spring); }
 .ext:hover::after { transform: translate(2px, -2px); }
 
 .contact { display: flex; gap: 16px; font-size: 14px; }
 .contact .ext::after { margin-left: .25em; }
 
 .previously { display: flex; flex-direction: column; gap: 24px; }
-.previously .label { font-size: 14px; font-weight: 300; text-transform: lowercase; }
+.previously .label { font-size: 14px; opacity: .5; }
 .job { display: flex; justify-content: space-between; align-items: flex-start; }
 .job > div { display: flex; flex-direction: column; gap: 8px; width: 183px; }
-.job .co { font-size: 16px; font-weight: 700; }
-.job .ext { font-size: 14px; font-weight: 300; width: fit-content; }
-.job .yrs { font-size: 14px; font-weight: 300; }
+.job .co { font-size: 16px; text-transform: capitalize; }
+.job .ext { font-size: 14px; width: fit-content; }
+.job .yrs { font-size: 14px; opacity: .5; }
 
-.lang { display: flex; gap: 1px; }
+/* ── BROOKLYN · TIME · NEXT SUNRISE / SUNSET ── */
+.here { display: flex; flex-direction: column; gap: 16px; font-size: 14px; }
+.here-row { display: flex; align-items: center; gap: 24px; font-variant-numeric: tabular-nums; }
+.sun-next { display: flex; align-items: center; gap: 4px; }
+.sun-next .i { width: 16px; height: 16px; }
+
+.lang {
+    position: absolute; z-index: 5;
+    right: var(--pad-x); bottom: var(--pad-y);
+    display: flex; gap: 1px;
+    transition: opacity .3s var(--ease);
+}
+.expanded .lang { opacity: 0; pointer-events: none; }
+/* the panel runs the full height (its height sets the phone size, so the
+   3rd phone stays cut off), over the chips' corner: they step aside meanwhile */
+.home-grid:has(.panel.show) .lang { opacity: 0; pointer-events: none; }
 .lang button {
     width: 44px; height: 24px;
     display: grid; place-items: center;
     border-radius: 4px;
-    font-size: 16px;
+    font-family: var(--mono); font-size: 16px;
     line-height: 1; /* script fonts' tall metrics pushed अ / اردو below EN */
     transition: background-color .2s;
 }
@@ -72,20 +87,29 @@ body.home { overflow: hidden; }
 .lang .g { display: block; }
 .nw { white-space: nowrap; }
 .lang button:not(.on):hover { background: var(--fg-faint); }
-/* translated bio: Latin letters stay in the mono, the script gets a proper font */
-.intro[lang="hi"], .previously .label[lang="hi"] { font-family: var(--mono), 'Noto Sans Devanagari', sans-serif; }
-.intro[lang="ur"], .previously .label[lang="ur"] { font-family: var(--mono), 'Noto Nastaliq Urdu', serif; }
+/* translated bio: Latin letters stay in Helvetica, the script gets a proper font */
+:is(.intro, .previously .label, .residing)[lang="hi"] { font-family: var(--sans), 'Noto Sans Devanagari', sans-serif; }
+:is(.intro, .previously .label, .residing)[lang="ur"] { font-family: var(--sans), 'Noto Nastaliq Urdu', serif; }
+.residing[lang="ur"] { line-height: 2.1; }
 .intro[lang="ur"] p, .intro[lang="ur"] h1 { line-height: 2.1; } /* Nastaliq needs tall lines */
 .intro[lang="ur"] p, .intro[lang="ur"] .contact .ext:first-child { font-size: 18px; } /* and reads small at the mono size */
 .intro[lang="ur"] p + p { margin-top: 0; }
 .intro[lang="ur"] .contact { justify-content: flex-start; align-items: baseline; } /* ای میل and LinkedIn share a baseline */
 
+/* 32px here (48px on project pages) */
 .theme-toggle {
     position: absolute;
     top: var(--pad-y); right: var(--pad-x);
     z-index: 5;
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--toggle-bg);
     transition: transform .25s var(--spring), background-color .4s var(--ease), opacity .3s var(--ease);
 }
+.theme-toggle:hover { transform: scale(1.08); }
+.theme-toggle:active { transform: scale(.94); }
+.theme-toggle .i { width: 21.333px; height: 21.333px; }
 .expanded .theme-toggle { opacity: 0; pointer-events: none; }
 
 /* ── PANEL ──
@@ -117,7 +141,6 @@ body.home { overflow: hidden; }
     background: var(--surface);
     transition: background-color .4s var(--ease), opacity .3s;
 }
-.panel.bare::before { opacity: 0; }
 .panel.show { opacity: 1; transform: none; pointer-events: auto; }
 .panel.bounce { animation: bounce .9s var(--spring) .15s; }
 @keyframes bounce {
@@ -156,7 +179,10 @@ body.home { overflow: hidden; }
 .pv-work .top-pill {
     position: absolute; top: 24px; left: 50%; z-index: 2;
     transform: translateX(-50%);
+    background: none; /* like the password modal's buttons: the fill only on hover */
+    transition: background-color .2s;
 }
+.pv-work .top-pill:hover, .pv-work .top-pill:focus-visible { background: var(--surface-2); }
 .pill-swap { position: relative; display: grid; }
 .pill-swap > * { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 8px; transition: opacity .3s, transform .4s var(--spring); }
 .pill-swap .when-open { opacity: 0; transform: translateY(6px); }
@@ -218,7 +244,7 @@ body.home { overflow: hidden; }
 .card:hover .phone, .card:focus-within .phone { transform: translateY(var(--lift)); }
 .card:hover .card-meta, .card:focus-within .card-meta { opacity: 1; transform: translateY(-8px); }
 .card-meta .logo { width: 24px; height: 24px; border-radius: 4.8px; object-fit: cover; flex-shrink: 0; }
-.card-meta .t { font-size: 16px; font-weight: 700; text-transform: lowercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-meta .t { font-size: 16px; font-weight: 500; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* make room: phones after the hovered one slide right */
 .expanded .card:is(:hover, :focus-within) ~ .card { transform: translateX(var(--push)); }
@@ -261,97 +287,6 @@ body.home { overflow: hidden; }
 .req input:focus, .req textarea:focus { border-style: dashed; }
 .req .send { justify-self: end; font-size: 14px; }
 
-/* ── MUSIC ── */
-.player {
-    position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    width: min(360px, 80cqw);
-    display: grid; gap: 20px;
-    padding: 24px;
-    border: 1px solid var(--line);
-    border-radius: 24px;
-    background: var(--bg);
-}
-.player .art {
-    width: 72%; justify-self: center;
-    aspect-ratio: 1; border-radius: 50%;
-    background: repeating-radial-gradient(circle, #1a130f 0 2px, #2b221c 3px 4px);
-    box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    position: relative;
-}
-.player .art::after {
-    content: ''; position: absolute; inset: 33%;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--bg) 0 7%, #ff8d58 8%);
-}
-.player.playing .art { animation: spin 4s linear infinite; }
-@keyframes spin { to { transform: rotate(1turn); } }
-.player .song { font-weight: 700; text-transform: lowercase; }
-.player .artist { font-size: 14px; font-weight: 300; color: var(--fg-muted); text-transform: lowercase; }
-.player .bar { height: 2px; background: var(--fg-faint); position: relative; }
-.player .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
-.player .times { display: flex; justify-content: space-between; font-size: 12px; font-weight: 300; margin-top: -12px; }
-.player .ctrl { display: flex; justify-content: center; align-items: center; gap: 32px; font-size: 18px; }
-.player .play {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: var(--fg); color: var(--bg);
-    display: grid; place-items: center;
-    transition: transform .2s var(--spring);
-}
-.player .play:active { transform: scale(.9); }
-/* Spotify's embed: a slim bar that's the credit and the real player */
-.player .spot, .player iframe { width: 100%; height: 80px; border: 0; border-radius: 12px; display: block; }
-.player .spot { background: var(--fg-faint); }
-.eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; margin-left: 8px; }
-.eq i { width: 2px; background: var(--fg); height: 30%; }
-.player.playing .eq i { animation: eq .8s ease-in-out infinite alternate; }
-.eq i:nth-child(2) { animation-delay: -.3s !important; }
-.eq i:nth-child(3) { animation-delay: -.6s !important; }
-@keyframes eq { to { height: 100%; } }
-
-/* ── BOOK ── */
-.book-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
-/* flat and large; capped near the cover file's own 500px height so it stays sharp */
-.book {
-    height: min(80cqh, 520px); aspect-ratio: 307 / 500;
-    object-fit: cover;
-    background: #e9dccb;
-    border-radius: 2px 6px 6px 2px;
-    box-shadow: 0 20px 40px rgba(0,0,0,.35);
-    transition: transform .4s var(--spring);
-}
-.book:hover { transform: translateY(-4px); }
-
-/* ── BROOKLYN MAP ── */
-.pv-map .bk-wrap { position: absolute; inset: 32px 32px 64px; }
-.bk-map { width: 100%; height: 100%; display: block; overflow: visible; }
-.bk-map .nb {
-    fill: transparent;
-    stroke: var(--fg); stroke-opacity: .28; stroke-width: .8;
-    vector-effect: non-scaling-stroke;
-    transition: fill .2s, stroke-opacity .2s;
-    cursor: crosshair;
-}
-.bk-map .nb.park { fill: var(--fg-faint); }               /* parks, cemeteries, airport */
-.bk-map .nb:hover { fill: var(--accent-bg); stroke: var(--accent); stroke-opacity: 1; }
-.bk-map .outline { fill: none; stroke: var(--fg); stroke-width: 1.5; vector-effect: non-scaling-stroke; pointer-events: none; }
-.bk-hood, .bk-temp { position: absolute; bottom: 24px; font-size: 14px; text-transform: lowercase; }
-.bk-hood { left: 32px; font-weight: 300; color: var(--accent); }
-.bk-temp { right: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.mbox .pv-map .bk-wrap { inset: 12px 12px 40px; }
-.mbox .bk-hood, .mbox .bk-temp { bottom: 12px; font-size: 12px; }
-.mbox .bk-hood { left: 12px; }
-.mbox .bk-temp { right: 12px; }
-
-/* ── TENNIS ── */
-.pv-tennis canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* a chip over the court, so the dashed net line doesn't run through the text */
-.pv-tennis .pv-note {
-    position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
-    display: block; padding: 4px 10px; border-radius: 4px;
-    background: var(--surface); color: var(--fg-muted); white-space: nowrap;
-}
-
 /* ── MOBILE ── (Figma: Mobile / Site Home) */
 .mdetail { display: flex; flex-direction: column; gap: 24px; }
 .mdetail[hidden], .previously[hidden] { display: none; }
@@ -368,13 +303,10 @@ body.home { overflow: hidden; }
     overflow: hidden;
 }
 .mbox .pv { left: 0; }
-.mbox.bare { background: none; aspect-ratio: auto; height: 380px; overflow: visible; }
-.mbox-book.bare { height: 420px; }
-.mbox-music.bare { height: 500px; } /* record player + spotify bar */
-.mbox .player { width: min(300px, 100%); }
-.mbox canvas { touch-action: none; }
 .mcap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px; }
 .mcap .txt { display: flex; flex-direction: column; gap: 2px; text-transform: lowercase; font-size: 14px; }
+.mcap.proj .txt { text-transform: capitalize; }
+.mcap.proj b { font-weight: 500; }
 .mcap .txt span { font-weight: 300; font-size: 13px; }
 .mcap.proj { justify-content: flex-start; gap: 8px; }
 .mcap .logo { width: 32px; height: 32px; border-radius: 6.67px; object-fit: cover; flex-shrink: 0; }
@@ -396,5 +328,6 @@ body.home { overflow: hidden; }
     .intro h1 { margin-bottom: 40px; }
     .mdetail { margin-top: -40px; } /* sits 24px under the links, like Figma */
     .theme-toggle { top: 64px; right: 24px; }
+    .lang { position: static; margin-top: 24px; } /* back under the bio, after Brooklyn */
     .stage, .panel { display: none; }
 }

@@ -19,7 +19,7 @@ const el = {
 
 /* ── RENDER ── */
 function overviewHTML(o) {
-    return `<div class="pg"><h2>Overview</h2><div class="meta">
+    return `<div class="pg"><h2 class="sr-only">Overview</h2><div class="meta">
         <div><h3>Category</h3><div class="row">${o.category.map(c => `<span>${c}</span>`).join('')}</div></div>
         <div><h3>Duration</h3><div class="row">${o.duration}</div></div>
         <div><h3>Team</h3><div class="chips">${o.team.map(t => `<span class="chip${t.accent ? ' accent' : ''}">${t.label}</span>`).join('')}</div></div>

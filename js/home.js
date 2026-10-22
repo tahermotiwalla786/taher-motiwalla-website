@@ -1,6 +1,6 @@
 /* ── HOME ─────────────────────────────────
    Hover a highlighted word → its panel floats in.
-   Click → it stays. Click Grubhub (or its panel) →
+   Click → it stays. Click "projects" (or its panel) →
    the panel expands into the projects carousel.
    ──────────────────────────────────────── */
 
@@ -43,30 +43,9 @@ const VIEWS = {
             <div class="cards" style="--n:${PROJECTS.length}">${cards}</div>
         </div>`;
     },
-    brooklyn: () => `<div class="pv pv-map"><div class="bk-wrap"></div>
-        <div class="bk-hood">&nbsp;</div>
-        <div class="bk-temp" aria-label="Temperature in Brooklyn now"></div></div>`,
     paint: () => imageView('paint'),
     draw: () => imageView('draw'),
     photo: () => imageView('photo'),
-    music: () => {
-        const m = HOBBIES.music;
-        return `<div class="pv"><div class="player">
-            <div class="art"></div>
-            <div><div class="song">${m.song}<span class="eq"><i></i><i></i><i></i></span></div><div class="artist">${m.artist}</div></div>
-            <div class="bar"><i></i></div>
-            <div class="times"><span class="cur">0:00</span><span>${Math.floor(m.length / 60)}:${String(m.length % 60).padStart(2, '0')}</span></div>
-            <div class="ctrl"><button aria-label="Back to start" data-act="rew">⏮</button><button class="play" aria-label="Play" data-act="play">▶</button><button aria-label="Back to start" data-act="rew">⏭</button></div>
-            <div class="spot" data-spot></div>
-        </div></div>`;
-    },
-    book: () => {
-        const b = HOBBIES.book;
-        return `<div class="pv"><div class="book-wrap">
-            <img class="book" src="${b.cover}" alt="${b.title} by ${b.author}, cover">
-        </div></div>`;
-    },
-    tennis: () => `<div class="pv pv-tennis"><canvas></canvas><p class="pv-note">${canHover ? 'move your mouse' : 'drag'} to play</p></div>`,
 };
 
 /* Each hover shows a different image: a shuffled deck per hobby, so
@@ -98,7 +77,6 @@ function render() {
         l.setAttribute('aria-expanded', l.dataset.panel === key);
     });
     panel.classList.toggle('pinned', !!pinKey && key === pinKey);
-    panel.classList.toggle('bare', key === 'music' || key === 'book'); // no brown card behind these
     if (!key) {
         panel.classList.remove('show');
         shownKey = null;
@@ -107,9 +85,6 @@ function render() {
     if (key !== shownKey) {
         panel.innerHTML = VIEWS[key]();
         shownKey = key;
-        if (key === 'tennis') startTennis($('canvas', panel));
-        if (key === 'music') mountSpotify(panel);
-        if (key === 'brooklyn') mountMap(panel);
     }
     panel.classList.add('show');
     if (key === 'grubhub' && !bounced && !document.body.classList.contains('expanded')) {
@@ -170,8 +145,6 @@ panel.addEventListener('click', e => {
     e.stopPropagation();
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'toggle-expand') { setExpanded(!isExpanded()); return; }
-    if (act === 'play') { togglePlayer(panel); return; }
-    if (act === 'rew') { restartSong(panel); return; }
 
     if (shownKey === 'grubhub') {
         if (!isExpanded()) { e.preventDefault(); setExpanded(true); return; }
@@ -257,139 +230,50 @@ shortcut(['Esc'], 'close / back', () => {
     else { pinKey = null; hoverKey = null; render(); }
 });
 
-/* ── MUSIC ──
-   The record player is the design; Spotify's embed (a slim bar under it,
-   which their terms say must stay visible) does the actual playing. Its
-   iFrame API reports playback, so the record spins, the bar fills and the
-   clock ticks only while the song really plays. The API script loads the
-   first time the music panel opens, not on page load. */
-let spotApi = null, spotWaiting = null;
-let spot = null; // { ctrl, root } for the embed currently on screen
-function loadSpotify(cb) {
-    if (spotApi) return cb(spotApi);
-    if (spotWaiting) { spotWaiting.push(cb); return; }
-    spotWaiting = [cb];
-    window.onSpotifyIframeApiReady = api => { spotApi = api; spotWaiting.splice(0).forEach(f => f(api)); };
-    const s = document.createElement('script');
-    s.src = 'https://open.spotify.com/embed/iframe-api/v1';
-    s.async = true;
-    document.head.append(s);
+/* ── BROOKLYN CLOCK ──
+   Brooklyn's time, ticking, and whichever comes next of sunrise or
+   sunset (24-hour, Brooklyn time). Sun times use NOAA's sunrise
+   equation, so nothing is fetched. */
+const NYC = { lat: 40.6782, lon: -73.9442, tz: 'America/New_York' };
+const fmtClock = new Intl.DateTimeFormat('en-GB', { timeZone: NYC.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' }); // zone reads GMT-4 (GMT-5 in winter)
+const fmtHM = new Intl.DateTimeFormat('en-GB', { timeZone: NYC.tz, hour: '2-digit', minute: '2-digit', hour12: false });
+
+// sunrise + sunset (Date objects) for the UTC day containing `d`
+function sunTimes(d) {
+    const rad = Math.PI / 180;
+    const day = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 864e5 + 2440587.5; // Julian day, 0h UTC
+    const n = Math.ceil(day - 2451545.0 + .0008) - NYC.lon / 360; // mean solar noon (east-positive longitude)
+    const M = (357.5291 + .98560028 * n) % 360;
+    const C = 1.9148 * Math.sin(M * rad) + .02 * Math.sin(2 * M * rad) + .0003 * Math.sin(3 * M * rad);
+    const L = (M + C + 180 + 102.9372) % 360;
+    const transit = 2451545.0 + n + .0053 * Math.sin(M * rad) - .0069 * Math.sin(2 * L * rad);
+    const dec = Math.asin(Math.sin(L * rad) * Math.sin(23.4397 * rad));
+    const cosH = (Math.sin(-.833 * rad) - Math.sin(NYC.lat * rad) * Math.sin(dec)) / (Math.cos(NYC.lat * rad) * Math.cos(dec));
+    const H = Math.acos(cosH) / rad;
+    const toDate = jd => new Date((jd - 2440587.5) * 864e5);
+    return { rise: toDate(transit - H / 360), set: toDate(transit + H / 360) };
 }
-function mountSpotify(root) {
-    const host = $('[data-spot]', root);
-    if (!host) return;
-    loadSpotify(api => {
-        if (!host.isConnected) return; // panel changed before the API arrived
-        api.createController(host, { uri: HOBBIES.music.spotify, width: '100%', height: 80 }, ctrl => {
-            spot = { ctrl, root };
-            // the API has no theme option; the embed's own theme=0 (dark) suits the site better than album colours
-            const f = $('iframe', root);
-            if (f && !f.src.includes('theme=')) f.src += '&theme=0';
-            ctrl.addListener('playback_update', e => syncPlayer(root, e.data));
-        });
-    });
-}
-const clock = ms => { const t = Math.floor(ms / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
-function syncPlayer(root, d) {
-    const p = $('.player', root);
-    if (!p) return;
-    const on = !d.isPaused;
-    p.classList.toggle('playing', on);
-    $('.play', p).textContent = on ? '❚❚' : '▶';
-    $('.play', p).setAttribute('aria-label', on ? 'Pause' : 'Play');
-    if (d.duration) {
-        $('.bar i', p).style.width = (d.position / d.duration * 100) + '%';
-        $('.times span:last-child', p).textContent = clock(d.duration);
+function nextSun(now) {
+    for (let i = 0; i < 3; i++) {
+        const t = sunTimes(new Date(now.getTime() + i * 864e5));
+        const ev = [['sunrise', t.rise], ['sunset', t.set]].sort((a, b) => a[1] - b[1]).find(([, at]) => at > now);
+        if (ev) return ev;
     }
-    $('.cur', p).textContent = clock(d.position);
 }
-const liveSpot = root => spot && spot.root === root && $('iframe', root) ? spot.ctrl : null;
-function togglePlayer(root) {
-    const ctrl = liveSpot(root);
-    if (ctrl) ctrl.togglePlay();
-    else toast('player is still loading');
+const clockEl = $('.clock'), sunEl = $('.sun-next');
+function tick() {
+    const now = new Date();
+    const parts = fmtClock.formatToParts(now);
+    const v = type => parts.find(p => p.type === type)?.value;
+    clockEl.textContent = `${v('hour')}:${v('minute')}:${v('second')} ${v('timeZoneName')}`;
+    clockEl.dateTime = now.toISOString();
+    const [kind, at] = nextSun(now);
+    $('time', sunEl).textContent = fmtHM.format(at);
+    sunEl.title = sunEl.ariaLabel = `next ${kind}: ${fmtHM.format(at)}`;
+    sunEl.dataset.kind = kind;
 }
-function restartSong(root) { liveSpot(root)?.seek(0); }
-
-/* ── BROOKLYN ──
-   Line map from NYC Open Data (borough + 2020 neighborhood boundaries),
-   built into assets/img/brooklyn.svg. Hovering names the neighborhood;
-   the corner shows Brooklyn's temperature right now (National Weather
-   Service hourly forecast: free, no key, public domain). Both load on
-   first open; the temperature is fetched once per visit. */
-let mapSVG = null, tempReq = null;
-const NWS_HOURLY = 'https://api.weather.gov/gridpoints/OKX/36,39/forecast/hourly'; // central Brooklyn
-function brooklynTemp() {
-    tempReq ||= fetch(NWS_HOURLY).then(r => r.json()).then(d => {
-        const p = d.properties.periods[0];
-        return `${p.temperature}°${p.temperatureUnit.toLowerCase()}`;
-    }).catch(() => (tempReq = null, ''));
-    return tempReq;
-}
-function mountMap(root) {
-    const wrap = $('.bk-wrap', root);
-    if (!wrap) return;
-    brooklynTemp().then(t => { const el = $('.bk-temp', root); if (el) el.textContent = t; });
-    const ready = mapSVG ? Promise.resolve(mapSVG)
-        : fetch('assets/img/brooklyn.svg').then(r => r.text()).then(t => (mapSVG = t));
-    ready.then(svgText => {
-        if (!wrap.isConnected) return;
-        wrap.innerHTML = svgText;
-        const svg = $('svg', wrap), hood = $('.bk-hood', root);
-        svg.addEventListener('pointermove', e => {
-            const nb = e.target.closest('.nb');
-            hood.textContent = nb ? nb.dataset.name : '\u00a0';
-        });
-        svg.addEventListener('pointerleave', () => { hood.textContent = '\u00a0'; });
-    }).catch(() => { wrap.textContent = 'map failed to load'; });
-}
-
-/* ── TENNIS (atari-style pong) ── */
-function startTennis(cv) {
-    const ctx = cv.getContext('2d');
-    const S = { w: 0, h: 0, ball: null, l: 0, r: 0, ls: 0, rs: 0, mouse: null };
-    const fit = () => {
-        const dpr = devicePixelRatio || 1, b = cv.getBoundingClientRect();
-        S.w = b.width; S.h = b.height;
-        cv.width = b.width * dpr; cv.height = b.height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        S.l = S.r = S.h / 2;
-    };
-    const serve = dir => { S.ball = { x: S.w / 2, y: S.h / 2, vx: 5 * dir, vy: (Math.random() * 4 - 2) }; };
-    fit(); serve(1);
-    const ro = new ResizeObserver(fit); ro.observe(cv);
-    cv.addEventListener('pointermove', e => { const b = cv.getBoundingClientRect(); S.mouse = e.clientY - b.top; });
-    cv.addEventListener('pointerleave', () => { S.mouse = null; });
-    cv.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') S.mouse = null; });
-
-    const PW = 10, PH = () => S.h * 0.14, PX = 40;
-    (function loop() {
-        if (!cv.isConnected) { ro.disconnect(); return; }
-        const fg = getComputedStyle(document.documentElement).getPropertyValue('--fg').trim();
-        const b = S.ball, ph = PH();
-        b.x += b.vx; b.y += b.vy;
-        if (b.y < 6 || b.y > S.h - 6) b.vy *= -1;
-        S.l += (b.y - S.l) * 0.085;
-        S.r = S.mouse != null ? S.mouse : S.r + (b.y - S.r) * 0.08;
-        const hit = (py, px) => Math.abs(b.y - py) < ph / 2 + 6 && Math.abs(b.x - px) < PW;
-        if (b.vx < 0 && hit(S.l, PX)) { b.vx = Math.min(-b.vx * 1.04, 12); b.vy += (b.y - S.l) * 0.08; }
-        if (b.vx > 0 && hit(S.r, S.w - PX)) { b.vx = -Math.min(b.vx * 1.04, 12); b.vy += (b.y - S.r) * 0.08; }
-        if (b.x < 0) { S.rs++; serve(1); }
-        if (b.x > S.w) { S.ls++; serve(-1); }
-
-        ctx.clearRect(0, 0, S.w, S.h);
-        ctx.fillStyle = fg;
-        for (let y = 12; y < S.h; y += 28) ctx.fillRect(S.w / 2 - 2, y, 4, 14);
-        ctx.fillRect(PX - PW / 2, S.l - ph / 2, PW, ph);
-        ctx.fillRect(S.w - PX - PW / 2, S.r - ph / 2, PW, ph);
-        ctx.fillRect(b.x - 6, b.y - 6, 12, 12);
-        ctx.font = '700 40px "JetBrains Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(String(S.ls).padStart(2, '0'), S.w / 2 - 70, 80);
-        ctx.fillText(String(S.rs).padStart(2, '0'), S.w / 2 + 70, 80);
-        requestAnimationFrame(loop);
-    })();
-}
+tick();
+setTimeout(() => { tick(); setInterval(tick, 1000); }, 1000 - Date.now() % 1000); // on the second
 
 /* ── MOBILE ──────────────────────────────
    Tapping a highlighted word swaps "previously" for a
@@ -414,23 +298,18 @@ function showMobile(k) {
     }
     const h = HOBBIES[k];
     const body = k === 'grubhub' ? mobileWork()
-        : `<div class="mbox${k === 'music' || k === 'book' ? ' bare' : ''} mbox-${k}">${VIEWS[k]()}</div>
+        : `<div class="mbox mbox-${k}">${VIEWS[k]()}</div>
            <div class="mcap"><div class="txt"><b>${h.caption[0]}</b><span>${h.caption[1]}</span></div></div>`;
     mdetail.innerHTML = `<button class="pill mret" data-act="mreturn"><span class="i i-return"></span>return</button>${body}`;
     previously.hidden = true;
     mdetail.hidden = false;
     mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
-    if (k === 'tennis') startTennis($('canvas', mdetail));
-    if (k === 'music') mountSpotify(mdetail);
-    if (k === 'brooklyn') mountMap(mdetail);
     mdetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 mdetail.addEventListener('click', e => {
     e.stopPropagation();
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'mreturn') { showMobile(null); return; }
-    if (act === 'play') { togglePlayer(mdetail); return; }
-    if (act === 'rew') { restartSong(mdetail); return; }
     const card = e.target.closest('.mcard');
     if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
 });

@@ -12,7 +12,8 @@
     --accent-bg: rgba(233,47,14,0.25);
     --phone:     #d9d9d9;
     --scrim:     rgba(0,0,0,0.2);
-    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace; /* only where Figma keeps it: ↗, language chips, password modal */
     --ease: cubic-bezier(.2,.8,.2,1);
     --spring: cubic-bezier(.34,1.56,.64,1);
     color-scheme: dark;
@@ -38,7 +39,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
-    font-family: var(--mono);
+    font-family: var(--sans);
     font-size: 16px;
     color: var(--fg);
     background: var(--bg);
@@ -77,6 +78,10 @@ img, video { display: block; }
 .i-book    { --src: url(../assets/icons/book.svg); }
 .i-chat    { --src: url(../assets/icons/chat.svg); }
 .i-cmd     { --src: url(../assets/icons/command.svg); }
+.i-up-arrow{ --src: url(../assets/icons/arrow-up.svg); }
+.i-send    { --src: url(../assets/icons/send.svg); }
+.i-check   { --src: url(../assets/icons/check.svg); }
+.i-sunrise { --src: url(../assets/icons/sunrise.svg); }
 
 .circle-btn {
     width: 48px; height: 48px;
@@ -187,13 +192,42 @@ img, video { display: block; }
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-/* ── PASSWORD GATE ── */
-.gate { display: grid; gap: 16px; padding: 32px; }
-.gate p { font-size: 14px; color: var(--fg-muted); }
-.gate-row { display: flex; border: 1px solid var(--line); }
+/* ── PASSWORD GATE ── (Figma: Comment Panel) */
+.gate-sheet {
+    width: min(572px, 100%);
+    display: grid; gap: 16px;
+    padding: 26px 24px;
+    background: var(--bg);
+    border: 0; border-radius: 0;
+}
+.gate-head { display: flex; align-items: center; gap: 16px; font-size: 16px; }
+.gate-head p { flex: 1; }
+.gate-head .i { width: 24px; height: 24px; }
+.gate-row, .gate-req {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 10px;
+    font-family: var(--mono); font-size: 16px; text-transform: uppercase;
+}
+.gate-row { border: 1px solid var(--line); }
 .gate-row.error { animation: shake .4s; border-color: #e0503c; }
-.gate-row input { flex: 1; min-width: 0; padding: 16px; background: none; border: 0; outline: 0; }
-.gate-row button { padding: 0 20px; border-left: 1px solid var(--line); text-transform: uppercase; }
+.gate-row input { flex: 1; min-width: 0; padding: 0; background: none; border: 0; outline: 0; line-height: normal; text-transform: inherit; letter-spacing: .08em; }
+.gate-row input::placeholder { color: var(--fg); opacity: 1; letter-spacing: 0; text-transform: uppercase; }
+.gate-req { width: 100%; text-align: left; }
+.gate-req > span:first-child { flex: 1; }
+/* the 28px square buttons: a fill on hover, a press, then a check */
+.gate-go {
+    width: 28px; height: 28px; flex-shrink: 0;
+    display: grid; place-items: center;
+    border-radius: 3.111px;
+    transition: background-color .2s, transform .15s var(--spring);
+}
+.gate-go .i { width: 18px; height: 18px; transition: opacity .15s, transform .3s var(--spring); }
+.gate-go .i-send { width: 18.667px; height: 18.667px; }
+.gate-go:hover, .gate-req:hover .gate-go, .gate-go:focus-visible { background: var(--surface); }
+.gate-go:active, .gate-go.press { transform: scale(.86); }
+.gate-go.done { background: none; }
+.gate-go.done .i { --src: url(../assets/icons/check.svg); animation: pop .35s var(--spring); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
 @keyframes shake {
     20%, 60% { transform: translateX(-6px); }
     40%, 80% { transform: translateX(6px); }
