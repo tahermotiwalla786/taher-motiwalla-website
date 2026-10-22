@@ -9,3 +9,15 @@ Tasks/
 hero images/
 shift tracker assets/
 hd *.png
+
+# Local-only: raw design exports, backups, tooling
+Portfolio update assets/
+Project Screens/
+videos/
+BACKUP_*.tar.gz
+.write-test
+.claude/
+
+# HEIC originals stay local; the site uses the converted JPGs
+*.HEIC
+*.heic

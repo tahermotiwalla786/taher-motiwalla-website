@@ -1,0 +1,337 @@
+/* ── HOME LAYOUT ─────────────────────────── */
+body.home { overflow: hidden; }
+.home-grid {
+    --pad-y: clamp(24px, 7.8vh, 108px);
+    --pad-x: clamp(20px, 6.25vw, 108px);
+    --gap: clamp(32px, 8vw, 144px);
+    position: relative;
+    height: 100vh; height: 100dvh;
+    padding: var(--pad-y) var(--pad-x);
+}
+
+/* ── BIO ── */
+.bio {
+    width: 400px; height: 100%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: opacity .3s var(--ease);
+}
+/* only fades: the column never resizes, so the text never reflows */
+.expanded .bio { opacity: 0; pointer-events: none; transition-delay: 0s; }
+.bio { transition-delay: .25s; }
+.bio-top { display: flex; flex-direction: column; gap: 48px; }
+.intro { display: flex; flex-direction: column; gap: 24px; }
+.intro h1 { font-size: 24px; font-weight: 500; }
+.intro p { font-size: 16px; line-height: normal; margin-inline-end: -4px; } /* "…try to paint." is 399.5px: Figma fits it on one line, so a hair of slack */
+.intro p + p { margin-top: -6px; } /* Figma: paragraphs 1 blank line apart, 18px */
+
+.hl, .ext {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    text-decoration-skip-ink: none;
+    font: inherit;
+    transition: text-decoration-color .2s, color .2s;
+}
+.hl { position: relative; cursor: pointer; }
+.hl:hover, .hl.active { text-decoration-thickness: 2px; }
+.hl.pinned { text-decoration-style: double; }
+.ext::after { content: '↗'; display: inline-block; font-family: var(--mono); text-decoration: none; margin-left: .3em; transition: transform .2s var(--spring); }
+.ext:hover::after { transform: translate(2px, -2px); }
+
+.contact { display: flex; gap: 16px; font-size: 14px; }
+.contact .ext::after { margin-left: .25em; }
+
+.previously { display: flex; flex-direction: column; gap: 24px; }
+.previously .label { font-size: 14px; opacity: .5; }
+.job { display: flex; justify-content: space-between; align-items: flex-start; }
+.job > div { display: flex; flex-direction: column; gap: 8px; width: 183px; }
+.job .co { font-size: 16px; text-transform: capitalize; }
+.job .ext { font-size: 14px; width: fit-content; }
+.job .yrs { font-size: 14px; opacity: .5; }
+
+/* ── BROOKLYN · TIME · NEXT SUNRISE / SUNSET ── */
+.here { display: flex; flex-direction: column; gap: 16px; font-size: 14px; }
+.here-row { display: flex; align-items: center; gap: 24px; font-variant-numeric: tabular-nums; }
+.sun-next { display: flex; align-items: center; gap: 4px; }
+.sun-next .i { width: 16px; height: 16px; }
+
+.lang {
+    position: absolute; z-index: 5;
+    right: var(--pad-x); bottom: var(--pad-y);
+    display: flex; gap: 1px;
+    transition: opacity .3s var(--ease);
+}
+.expanded .lang { opacity: 0; pointer-events: none; }
+/* the panel runs the full height (its height sets the phone size, so the
+   3rd phone stays cut off), over the chips' corner: they step aside meanwhile */
+.home-grid:has(.panel.show) .lang { opacity: 0; pointer-events: none; }
+.lang button {
+    width: 44px; height: 24px;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    font-family: var(--mono); font-size: 16px;
+    line-height: 1; /* script fonts' tall metrics pushed अ / اردو below EN */
+    transition: background-color .2s;
+}
+.lang button.on { background: var(--surface); }
+/* Devanagari and Urdu need a real script font; a monospace one breaks the letter joins */
+/* The chips use their own copies of just these letters (Noto, OFL; ~2KB in
+   assets/fonts), under their own names, so the full fonts that load when a
+   language is picked can't shift them. Nudges below are measured for these. */
+@font-face { font-family: 'Chip Devanagari'; src: url(../assets/fonts/chip-devanagari.woff2) format('woff2'); font-display: block; }
+@font-face { font-family: 'Chip Nastaliq'; src: url(../assets/fonts/chip-nastaliq.woff2) format('woff2'); font-display: block; }
+.lang [lang="hi"] { font-family: 'Chip Devanagari', system-ui, sans-serif; }
+.lang [lang="ur"] { font-family: 'Chip Nastaliq', system-ui, serif; }
+.lang [lang="hi"] .g { transform: translateY(1.5px); }
+.lang [lang="ur"] .g { transform: translateY(-3.6px); }
+.lang .g { display: block; }
+.nw { white-space: nowrap; }
+.lang button:not(.on):hover { background: var(--fg-faint); }
+/* translated bio: Latin letters stay in Helvetica, the script gets a proper font */
+:is(.intro, .previously .label, .residing)[lang="hi"] { font-family: var(--sans), 'Noto Sans Devanagari', sans-serif; }
+:is(.intro, .previously .label, .residing)[lang="ur"] { font-family: var(--sans), 'Noto Nastaliq Urdu', serif; }
+.residing[lang="ur"] { line-height: 2.1; }
+.intro[lang="ur"] p, .intro[lang="ur"] h1 { line-height: 2.1; } /* Nastaliq needs tall lines */
+.intro[lang="ur"] p, .intro[lang="ur"] .contact .ext:first-child { font-size: 18px; } /* and reads small at the mono size */
+.intro[lang="ur"] p + p { margin-top: 0; }
+.intro[lang="ur"] .contact { justify-content: flex-start; align-items: baseline; } /* ای میل and LinkedIn share a baseline */
+
+/* 32px here (48px on project pages) */
+.theme-toggle {
+    position: absolute;
+    top: var(--pad-y); right: var(--pad-x);
+    z-index: 5;
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--toggle-bg);
+    transition: transform .25s var(--spring), background-color .4s var(--ease), opacity .3s var(--ease);
+}
+.theme-toggle:hover { transform: scale(1.08); }
+.theme-toggle:active { transform: scale(.94); }
+.theme-toggle .i { width: 21.333px; height: 21.333px; }
+.expanded .theme-toggle { opacity: 0; pointer-events: none; }
+
+/* ── PANEL ──
+   The panel is always laid out at its expanded size. When collapsed,
+   its left part is clipped away (--inset), so expanding only slides
+   the left edge — nothing moves vertically and nothing reflows. */
+.panel {
+    --inset: max(400px + var(--gap), 100% - 968px);
+    --ease-x: cubic-bezier(.65, 0, .25, 1);
+    container-type: size;
+    position: absolute;
+    top: var(--pad-y);
+    left: var(--pad-x);
+    right: calc(var(--pad-x) + 72px); /* room for the theme toggle */
+    height: min(900px, 100% - 2 * var(--pad-y));
+    clip-path: inset(0 0 0 var(--inset) round 36px);
+    opacity: 0;
+    transform: translateX(24px) scale(.98);
+    transform-origin: right center;
+    pointer-events: none;
+    transition:
+        opacity .3s var(--ease),
+        transform .45s var(--spring),
+        clip-path .65s var(--ease-x),
+        left .65s var(--ease-x), right .65s var(--ease-x), height .65s var(--ease-x);
+}
+.panel::before { /* the brown card */
+    content: ''; position: absolute; inset: 0;
+    background: var(--surface);
+    transition: background-color .4s var(--ease), opacity .3s;
+}
+.panel.show { opacity: 1; transform: none; pointer-events: auto; }
+.panel.bounce { animation: bounce .9s var(--spring) .15s; }
+@keyframes bounce {
+    0%, 100% { transform: none; }
+    35% { transform: translateX(-14px); }
+    65% { transform: translateX(4px); }
+}
+.expanded .panel {
+    clip-path: inset(0 0 0 0 round 36px);
+    /* same gap on all four sides; no toggle to make room for */
+    left: var(--pad-y); right: var(--pad-y);
+    height: calc(100% - 2 * var(--pad-y));
+}
+
+.pv {
+    position: absolute; top: 0; bottom: 0; right: 0;
+    left: var(--inset);
+    animation: pv-in .35s var(--ease);
+    transition: left .65s var(--ease-x);
+}
+.expanded .pv { left: 0; }
+@keyframes pv-in { from { opacity: 0; } }
+
+.pv-note {
+    display: grid; place-items: center; align-content: center; gap: 4px;
+    padding: 32px;
+    font-size: 14px; font-weight: 300;
+    text-transform: lowercase; text-align: center;
+}
+.pv-note .sub { color: var(--fg-muted); }
+
+/* image hobby: fills the card (portrait images crop top and bottom) */
+.pv-img img { width: 100%; height: 100%; object-fit: cover; animation: pv-in .35s var(--ease); }
+
+/* ── GRUBHUB / PROJECTS ── */
+.pv-work .top-pill {
+    position: absolute; top: 24px; left: 50%; z-index: 2;
+    transform: translateX(-50%);
+    background: none; /* like the password modal's buttons: the fill only on hover */
+    transition: background-color .2s;
+}
+.pv-work .top-pill:hover, .pv-work .top-pill:focus-visible { background: var(--surface-2); }
+.pill-swap { position: relative; display: grid; }
+.pill-swap > * { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 8px; transition: opacity .3s, transform .4s var(--spring); }
+.pill-swap .when-open { opacity: 0; transform: translateY(6px); }
+.expanded .pill-swap .when-open { opacity: 1; transform: none; }
+.expanded .pill-swap .when-closed { opacity: 0; transform: translateY(-6px); }
+/* the hidden label stops taking up width, so "return" isn't padded out to "see more" */
+.pill-swap .when-open, .expanded .pill-swap .when-closed { position: absolute; left: 0; top: 0; }
+.expanded .pill-swap .when-open { position: static; }
+
+/* Phones are the same size in both states: as tall as the panel
+   allows after the pill (top) and the hover title (bottom).
+   Expanded, they spread to fill the panel; with more projects than fit
+   it's a carousel and phones run off the edges. A hovered phone never
+   moves sideways; the phones after it slide right (--push) to make room
+   for its buttons, past the edge if need be. */
+.cards {
+    --edge: clamp(48px, 5cqw, 80px);
+    --ph: calc(100cqh - 96px - 64px); /* top: pill · bottom: title */
+    --pw: calc(var(--ph) * 402 / 874);
+    --edge-r: max(var(--edge), 76px); /* the last phone's buttons always fit: 24 gap + 36 button + 16 */
+    --push: 40px;
+    position: absolute;
+    left: 0; right: 0; top: 72px;
+    display: flex; gap: 48px;
+    padding: 24px var(--edge-r) 0 var(--edge); /* top room so a lifted phone isn't clipped */
+    overflow-x: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    transition: gap .65s var(--ease-x);
+}
+.cards::-webkit-scrollbar { display: none; }
+/* scrolls only when the phones don't fit at rest (.scrolls, set in home.js):
+   the hover push alone must never make the row scrollable, or Safari snaps it
+   a whole card over and the hovered phone jumps out from under the cursor */
+.expanded .cards.scrolls { overflow-x: auto; }
+.cards:not(.scrolls) { scroll-snap-type: none; }
+.expanded .cards {
+    /* spread edge to edge; with too many projects to fit, fall back to 48px and scroll */
+    gap: max(48px, (100cqw - var(--edge) - var(--edge-r) - var(--n) * var(--pw)) / max(1, var(--n) - 1));
+}
+
+.card {
+    --lift: -20px;
+    position: relative;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    scroll-margin-left: var(--edge);
+    transition: transform .45s var(--ease-x);
+}
+.card-main { width: var(--pw); display: flex; flex-direction: column; gap: 16px; text-decoration: none; }
+.card .phone {
+    z-index: 1;
+    height: var(--ph);
+    transition: transform .4s var(--spring), background-color .4s;
+}
+/* hover: the phone lifts and the title slides out from under it */
+.card-meta {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 0 6px;
+    opacity: 0; transform: translateY(-20px);
+    transition: opacity .25s var(--ease), transform .4s var(--spring);
+}
+.card:hover .phone, .card:focus-within .phone { transform: translateY(var(--lift)); }
+.card:hover .card-meta, .card:focus-within .card-meta { opacity: 1; transform: translateY(-8px); }
+.card-meta .logo { width: 24px; height: 24px; border-radius: 4.8px; object-fit: cover; flex-shrink: 0; }
+.card-meta .t { font-size: 16px; font-weight: 500; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* make room: phones after the hovered one slide right */
+.expanded .card:is(:hover, :focus-within) ~ .card { transform: translateX(var(--push)); }
+
+/* side buttons (expanded only): read the case study · request details.
+   The 24px spacer is part of the box, so moving to the buttons keeps the hover. */
+.card-acts {
+    position: absolute; top: 0; left: 100%;
+    width: 60px; height: var(--ph);
+    display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 48px;
+    opacity: 0; visibility: hidden;
+    transform: translate(-8px, var(--lift));
+    transition: opacity .2s var(--ease), transform .35s var(--spring), visibility 0s .2s;
+}
+.expanded .card:is(:hover, :focus-within) .card-acts {
+    opacity: 1; visibility: visible;
+    transform: translate(0, var(--lift));
+    transition: opacity .2s var(--ease) .1s, transform .35s var(--spring) .1s, visibility 0s;
+}
+.act {
+    width: 36px; height: 36px; flex-shrink: 0;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    color: var(--fg);
+    transition: background-color .2s, transform .2s var(--spring);
+}
+.act .i { width: 24px; height: 24px; }
+.act:hover, .act:focus-visible { background: var(--surface-2); }
+.act:active { transform: scale(.92); }
+
+/* request-details dialog */
+.req { display: grid; gap: 16px; padding: 24px 32px 32px; }
+.req > p { font-size: 14px; font-weight: 300; color: var(--fg-muted); text-transform: lowercase; }
+.req label { display: grid; gap: 8px; font-size: 14px; text-transform: lowercase; }
+.req input, .req textarea {
+    width: 100%; padding: 12px 14px;
+    background: none; border: 1px solid var(--line); border-radius: 0; outline: 0;
+    font-size: 14px; resize: vertical;
+}
+.req input:focus, .req textarea:focus { border-style: dashed; }
+.req .send { justify-self: end; font-size: 14px; }
+
+/* ── MOBILE ── (Figma: Mobile / Site Home) */
+.mdetail { display: flex; flex-direction: column; gap: 24px; }
+.mdetail[hidden], .previously[hidden] { display: none; }
+.m-in { animation: m-in .45s var(--ease) both; }
+@keyframes m-in { from { opacity: 0; transform: translateY(12px); } }
+.mret { align-self: flex-start; gap: 6px; font-size: 14px; padding: 6px 10px 6px 8px; }
+.mret .i { width: 24px; height: 24px; }
+.mbox {
+    container-type: size;
+    position: relative;
+    aspect-ratio: 352 / 243;
+    border-radius: 8px;
+    background: var(--surface);
+    overflow: hidden;
+}
+.mbox .pv { left: 0; }
+.mcap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px; }
+.mcap .txt { display: flex; flex-direction: column; gap: 2px; text-transform: lowercase; font-size: 14px; }
+.mcap.proj .txt { text-transform: capitalize; }
+.mcap.proj b { font-weight: 500; }
+.mcap .txt span { font-weight: 300; font-size: 13px; }
+.mcap.proj { justify-content: flex-start; gap: 8px; }
+.mcap .logo { width: 32px; height: 32px; border-radius: 6.67px; object-fit: cover; flex-shrink: 0; }
+.mcards { display: flex; flex-direction: column; gap: 24px; }
+.mcard { display: flex; flex-direction: column; gap: 16px; text-decoration: none; animation: m-in .5s var(--ease) both; animation-delay: calc(var(--i) * 60ms); }
+.mcard .mbox .phone {
+    position: absolute; left: 50%; top: 15.6%;
+    width: 79.5%; height: auto;
+    transform: translateX(-50%);
+    transition: transform .35s var(--spring);
+}
+.mcard:active .mbox .phone { transform: translateX(-50%) translateY(-6px); }
+
+@media (max-width: 900px) {
+    body.home { overflow: auto; }
+    .home-grid { height: auto; min-height: 100dvh; padding: 64px 24px; }
+    .bio { width: 100%; height: auto; min-height: calc(100dvh - 128px); padding-top: 112px; gap: 64px; }
+    .bio-top { gap: 64px; }
+    .intro h1 { margin-bottom: 40px; }
+    .mdetail { margin-top: -40px; } /* sits 24px under the links, like Figma */
+    .theme-toggle { top: 64px; right: 24px; }
+    .lang { position: static; margin-top: 24px; } /* back under the bio, after Brooklyn */
+    .stage, .panel { display: none; }
+}

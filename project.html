@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L690CL5VLW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L690CL5VLW');
+    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project — Taher Motiwalla</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/project.css">
+</head>
+<body class="project locked">
+
+<header class="topnav">
+    <nav><a href="index.html">Home</a><a href="index.html#projects">Projects</a></nav>
+    <div class="topnav-r">
+        <a class="circle-btn" href="mailto:tahermotiwalla@gmail.com" aria-label="Email"><span class="i i-email"></span></a>
+        <a class="circle-btn" href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener" aria-label="LinkedIn"><span class="i i-linkedin"></span></a>
+        <button class="circle-btn theme-toggle" aria-label="Switch to light mode"><span class="i i-moon"></span><span class="i i-sun"></span></button>
+    </div>
+</header>
+
+<!-- mobile top bar (Figma: Mobile / Drive Home Evolution) -->
+<div class="mtop">
+    <a class="mbtn" href="index.html#projects" aria-label="Back to projects"><span class="i i-up rot-left"></span></a>
+    <button class="mpill" id="mpill" aria-haspopup="dialog"><img class="logo" src="assets/img/gh-logo.png" alt=""><span id="mptitle"></span></button>
+</div>
+
+<main class="proj">
+    <section class="stage">
+        <div class="stage-media">
+            <img class="stage-bg" src="assets/img/project-bg.png" alt="">
+            <a class="backbtn" href="index.html#projects" aria-label="Back to projects"><span class="i i-back"></span><span class="lbl">projects</span></a>
+            <div class="phones" id="phones"></div>
+        </div>
+        <div class="pagenav">
+            <div class="sc-wrap">
+                <button class="sc-btn" id="sc-btn" aria-expanded="false" aria-controls="sc-pop"><span class="i i-cmd"></span>Shortcuts</button>
+                <div class="sc-pop" id="sc-pop" role="dialog" aria-label="Keyboard shortcuts" hidden>
+                    <div class="sc-head">shortcuts <button id="sc-close" aria-label="Close shortcuts"><span class="i i-close"></span></button></div>
+                    <div class="sc-list" id="sc-list"></div>
+                </div>
+            </div>
+            <div class="pagenav-c">
+                <button id="prev" aria-label="Previous page"><span class="i i-up"></span></button>
+                <button class="like" id="like" aria-pressed="false" aria-label="Like"><span class="heart"><span class="i i-heart"></span><span class="i i-heart-fill"></span></span><span class="count" id="likes">00</span></button>
+                <button id="next" aria-label="Next page"><span class="i i-down"></span></button>
+            </div>
+            <p class="counter" id="counter">1/7</p>
+        </div>
+    </section>
+
+    <aside class="side">
+        <button class="projmenu" id="projmenu" aria-haspopup="dialog">
+            <img class="logo" id="logo" src="assets/img/gh-logo.png" alt="">
+            <span class="ptitle" id="ptitle"></span>
+            <span class="i i-down"></span>
+        </button>
+        <div class="side-body" id="sidebody"></div>
+        <div class="mlike-row"><button class="like mlike" aria-pressed="false" aria-label="Like"><span class="heart"><span class="i i-heart"></span><span class="i i-heart-fill"></span></span><span class="count">00</span></button></div>
+        <div class="side-foot" id="sidefoot">
+            <button class="btn" id="comment-open">Ask a question</button>
+            <form class="comment" id="comment">
+                <label class="comment-field">
+                    <span class="ts" id="ts">00:00</span>
+                    <input id="comment-input" placeholder="Type your question" autocomplete="off" aria-label="Your question">
+                </label>
+                <p class="ask-note"><span class="i i-email"></span>goes to taher's inbox, sent from your email app</p>
+                <div class="comment-btns">
+                    <button type="button" class="btn" id="comment-cancel">Cancel</button>
+                    <button type="submit" class="btn solid">Send email<svg class="arr" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+                </div>
+            </form>
+        </div>
+    </aside>
+</main>
+
+<div class="overlay overlay-right" id="menu" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-label="Projects">
+        <div class="sheet-head">Projects <button data-close aria-label="Close"><span class="i i-close"></span></button></div>
+        <div class="plist" id="plist"></div>
+        <div class="mlinks"><a class="prow" href="index.html">Home</a><a class="prow" href="index.html">About me</a></div>
+        <label class="psearch"><span class="i i-search"></span><input id="psearch" placeholder="search...." autocomplete="off" aria-label="Search projects"></label>
+        <div class="mfoot">
+            <a class="circle-btn" href="mailto:tahermotiwalla@gmail.com" aria-label="Email"><span class="i i-email"></span></a>
+            <a class="circle-btn" href="https://www.linkedin.com/in/taher-luvai-motiwalla/" target="_blank" rel="noopener" aria-label="LinkedIn"><span class="i i-linkedin"></span></a>
+            <button class="circle-btn theme-toggle" aria-label="Switch to light mode"><span class="i i-moon"></span><span class="i i-sun"></span></button>
+        </div>
+    </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/project.js"></script>
+</body>
+</html>
