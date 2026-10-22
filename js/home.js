@@ -98,7 +98,23 @@ function setExpanded(on) {
     if (on) { pinKey = 'grubhub'; hoverKey = null; render(); }
     document.body.classList.toggle('expanded', on);
     history.replaceState(null, '', on ? '#projects' : location.pathname);
+    updateScrolls();
 }
+
+/* The row is a carousel only if the phones overflow at their minimum
+   48px gap. Worked out from sizes, not scrollWidth, which also counts
+   the hovered phone's push. */
+function updateScrolls() {
+    const row = $('.cards', panel);
+    if (!row) return;
+    const cs = getComputedStyle(row), n = row.children.length;
+    const need = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+        + n * $('.card-main', row).getBoundingClientRect().width + (n - 1) * 48;
+    const scrolls = isExpanded() && need > row.clientWidth + 4; // a few px of rounding isn't worth a carousel
+    row.classList.toggle('scrolls', scrolls);
+    if (!scrolls) row.scrollLeft = 0;
+}
+new ResizeObserver(updateScrolls).observe(panel);
 const isExpanded = () => document.body.classList.contains('expanded');
 
 /* ── HOVER ── */
@@ -210,7 +226,7 @@ function openRequest(p) {
 /* horizontal scroll with a normal mouse wheel */
 panel.addEventListener('wheel', e => {
     const row = e.target.closest('.cards');
-    if (!row || !isExpanded() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (!row?.classList.contains('scrolls') || !isExpanded() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     e.preventDefault();
     row.scrollBy({ left: e.deltaY * 1.2 });
 }, { passive: false });
@@ -219,7 +235,7 @@ panel.addEventListener('wheel', e => {
 /* ── SHORTCUTS ── */
 function scrollCards(dir) {
     const row = $('.cards', panel);
-    if (!row) return;
+    if (!row?.classList.contains('scrolls')) return;
     const step = $('.card-main', row).offsetWidth + 48;
     row.scrollBy({ left: dir * step, behavior: 'smooth' });
 }

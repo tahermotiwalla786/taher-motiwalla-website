@@ -214,8 +214,12 @@ body.home { overflow: hidden; }
     transition: gap .65s var(--ease-x);
 }
 .cards::-webkit-scrollbar { display: none; }
+/* scrolls only when the phones don't fit at rest (.scrolls, set in home.js):
+   the hover push alone must never make the row scrollable, or Safari snaps it
+   a whole card over and the hovered phone jumps out from under the cursor */
+.expanded .cards.scrolls { overflow-x: auto; }
+.cards:not(.scrolls) { scroll-snap-type: none; }
 .expanded .cards {
-    overflow-x: auto;
     /* spread edge to edge; with too many projects to fit, fall back to 48px and scroll */
     gap: max(48px, (100cqw - var(--edge) - var(--edge-r) - var(--n) * var(--pw)) / max(1, var(--n) - 1));
 }

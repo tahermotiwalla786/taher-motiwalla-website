@@ -59,16 +59,18 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
 .backbtn:hover .lbl, .backbtn:focus-visible .lbl { opacity: 1; transition-delay: .08s; }
 .backbtn:hover .i { transform: translateX(-2px); }
 
-.phones { position: absolute; inset: 0; z-index: 2; }
+.phones { position: absolute; inset: 0; z-index: 2; container-type: size; }
+/* Centred with margins, not translate(-50%): Safari drew the sliding
+   video phones off to the side when the animation moved a % transform. */
 .slot {
-    position: absolute; left: 50%; top: 50%;
-    height: min(900px, calc(100% - 96px)); /* 48px above and below; the scrubber lives in the bottom gap */
-    transform: translate(-50%, -50%);
+    --h: min(900px, 100cqh - 96px); /* 48px above and below; the scrubber lives in the bottom gap */
+    position: absolute; inset: 0; margin: auto;
+    width: calc(var(--h) * 402 / 874); height: var(--h);
     --p: 0;
     --lift: cubic-bezier(.34, 1.4, .64, 1);
 }
 .slot .phone {
-    height: 100%;
+    width: 100%; height: 100%;
     box-shadow: 0 30px 60px rgba(0,0,0,.35);
     transition: transform .55s var(--lift);
 }
@@ -304,7 +306,7 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
     .stage { flex: 1; }
     .stage-media { flex: 1; height: auto; }
     .phones { inset: 16px 0 68px; }            /* bottom room for the scrubber (+16px sheet overlap) */
-    .slot { height: 100%; }
+    .slot { --h: 100cqh; }
     .slot.scrub-on .phone { transform: none; } /* mobile: scrubber has its own room */
     .scrubber { top: calc(100% + 14px); }
 

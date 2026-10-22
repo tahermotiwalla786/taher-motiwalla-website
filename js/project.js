@@ -157,11 +157,11 @@ function renderPhone(dir) {
     const opts = { duration: 550, easing: 'cubic-bezier(.2,.8,.2,1)' };
     // desktop flips vertically (scroll); mobile slides sideways (swipe)
     const at = off => matchMedia('(max-width: 900px)').matches
-        ? `translate(calc(-50% + ${off}px), -50%)` : `translate(-50%, calc(-50% + ${off}px))`;
-    old.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `${at(-d)} scale(.94)`, opacity: 0 }], opts)
+        ? `translateX(${off}px)` : `translateY(${off}px)`;
+    old.animate([{ transform: 'none', opacity: 1 }, { transform: `${at(-d)} scale(.94)`, opacity: 0 }], opts)
         .finished.catch(() => {}).then(() => old.remove());
     setTimeout(() => old.remove(), opts.duration + 100); // in case the animation never finishes (background tab)
-    s.animate([{ transform: `${at(d)} scale(.94)`, opacity: 0 }, { transform: 'translate(-50%,-50%)', opacity: 1 }], opts);
+    s.animate([{ transform: `${at(d)} scale(.94)`, opacity: 0 }, { transform: 'none', opacity: 1 }], opts);
 }
 
 function renderProject() {
