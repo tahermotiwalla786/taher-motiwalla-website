@@ -7,10 +7,11 @@ const PROJECTS = [
     {
         slug: 'drive-home-evolution',
         title: 'Drive home evolution',
+        desc: 'Driver home rebuilt to be fluid', // six words or so: home cards, mobile list, project menu
         logo: 'assets/img/gh-logo.png',
         tags: ['motion', 'interaction', 'haptics'],
         cardTags: ['0→1', 'motion', 'haptics'],
-        cover: { type: 'video', src: 'assets/video/toggle-on.mp4' },
+        cover: { type: 'video', src: 'assets/video/dh-cover-loop.mp4' },
         overview: {
             category: ['motion', 'interaction', 'haptics'],
             duration: '1-2 months',
@@ -48,10 +49,11 @@ const PROJECTS = [
     {
         slug: 'best-times-to-work',
         title: 'Best times to work',
+        desc: 'Right place, right time for drivers',
         logo: 'assets/img/gh-logo.png',
         tags: ['data viz', 'planning'],
         cardTags: ['0→1', 'data viz'],
-        cover: { type: 'video', src: 'assets/video/bt-schedule-home.mp4' },
+        cover: { type: 'video', src: 'assets/video/bt-cover-loop.mp4' },
         pages: [
             { title: 'Overview',
               body: "Scheduling is how drivers plan their shifts. We redesigned it to add real utility, making it easier for drivers to plan and optimize their work week.",
@@ -70,6 +72,7 @@ const PROJECTS = [
     {
         slug: 'drop-off-tasks',
         title: 'Drop off tasks',
+        desc: 'Quick iterations to raise quality',
         logo: 'assets/img/gh-logo.png',
         tags: ['workflow', 'interaction'],
         cardTags: ['0→1', 'workflow'],
@@ -79,6 +82,7 @@ const PROJECTS = [
     {
         slug: 'shift-tracker',
         title: 'Shift tracker',
+        desc: 'Drivers track their performance',
         logo: 'assets/img/gh-logo.png',
         tags: ['data viz', 'motion'],
         cardTags: ['data viz', 'motion'],
@@ -135,6 +139,16 @@ const HOBBIES = {
     paint:  { type: 'image', note: 'painting', caption: ['painting', 'acrylic on canvas'], srcs: PAINTINGS },
     draw:   { type: 'image', note: 'drawing',  caption: ['drawing', 'sketchbook'],        srcs: DRAWINGS },
     photo:  { type: 'image', note: 'photo',    caption: ['photo', 'shot on film'],        srcs: PHOTOS },
+};
+
+/* Home: "Or else..." steps through these, in order, one per click.
+   Clicking the last one turns it into a player for SONG (Hindi and
+   Urdu versions live in lang.js). */
+const OR_ELSE = ['Or else...', 'buddy you don’t wanna find out', 'Grrrrrrrrrrr', 'jk hehe'];
+const SONG = {
+    title: 'Can We Talk', artist: 'Tevin Campbell',
+    preview: 'https://p.scdn.co/mp3-preview/06750f88f19c0113787d2e6715484225e52d0a9e', // Spotify's 30s preview
+    spotify: 'https://open.spotify.com/track/6a5jHgwqYMk9wlYJYfs3c9',
 };
 
 const LINKS = {

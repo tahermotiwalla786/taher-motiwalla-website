@@ -14,6 +14,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 function setTheme(t) {
     document.documentElement.dataset.theme = t;
     store.set('theme', t);
+    $('meta[name="theme-color"]')?.setAttribute('content', t === 'light' ? '#f9e9df' : '#0b0500'); // Safari tints its toolbars with this
     $$('.theme-toggle').forEach(b => b.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'));
 }
 function toggleTheme() {
@@ -76,12 +77,7 @@ document.addEventListener('keydown', e => {
         if (typing) { e.target.blur(); }
     }
     if (typing) return;
-    if (e.key === '?' && typeof toggleShortcuts === 'function') { toggleShortcuts(); return; } // project page: popover
-    if (e.key === '?') {
-        const o = $('#shortcuts') || buildShortcutSheet();
-        o.classList.contains('open') ? closeOverlay(o) : openOverlay(o);
-        return;
-    }
+    if (e.key === '?') { showShortcuts(); return; }
     if (anyOverlayOpen() && e.key !== 'Escape') return;
     for (const s of SHORTCUTS) {
         if (s.keys.some(k => (KEYMAP[k.toLowerCase()] || k.toLowerCase()) === (e.key.length === 1 ? e.key.toLowerCase() : e.key))) {
@@ -92,6 +88,12 @@ document.addEventListener('keydown', e => {
     }
 });
 shortcut(['D'], 'dark / light mode', toggleTheme);
+
+function showShortcuts() {
+    if (typeof toggleShortcuts === 'function') { toggleShortcuts(); return; } // project page: popover
+    const o = $('#shortcuts') || buildShortcutSheet();
+    o.classList.contains('open') ? closeOverlay(o) : openOverlay(o);
+}
 
 /* ── PASSWORD GATE ──
    Same password + session flag as the previous site. The arrow (or

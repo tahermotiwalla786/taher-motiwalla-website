@@ -14,12 +14,13 @@ const el = {
     phones: $('#phones'), prev: $('#prev'), next: $('#next'), counter: $('#counter'),
     like: $('#like'), likes: $('#likes'), body: $('#sidebody'), title: $('#ptitle'), logo: $('#logo'),
     foot: $('#sidefoot'), ts: $('#ts'), input: $('#comment-input'),
-    menu: $('#menu'), plist: $('#plist'), search: $('#psearch'),
+    menu: $('#menu'), plist: $('#plist'),
 };
+const mobileMQ = matchMedia('(max-width: 900px)');
 
 /* ── RENDER ── */
-function overviewHTML(o) {
-    return `<div class="pg"><h2 class="sr-only">Overview</h2><div class="meta">
+function overviewHTML(o, pager) {
+    return `<div class="pg"><div class="pg-head"><h2 class="sr-only">Overview</h2>${pager}</div><div class="meta">
         <div><h3>Category</h3><div class="row">${o.category.map(c => `<span>${c}</span>`).join('')}</div></div>
         <div><h3>Duration</h3><div class="row">${o.duration}</div></div>
         <div><h3>Team</h3><div class="chips">${o.team.map(t => `<span class="chip${t.accent ? ' accent' : ''}">${t.label}</span>`).join('')}</div></div>
@@ -28,20 +29,21 @@ function overviewHTML(o) {
     </div></div>`;
 }
 
-function renderSide() {
-    const pg = project.pages[page];
-    const isOverview = pg.overview && project.overview;
-    el.body.classList.toggle('centered', !isOverview);
-    el.body.innerHTML = isOverview ? overviewHTML(project.overview)
-        : `<div class="pg"><h2>${pg.title}</h2><p class="body">${pg.body || ''}</p></div>`;
+const isOverviewPage = i => project.pages[i].overview && project.overview;
+function sideHTML(i) {
+    const pg = project.pages[i], n = project.pages.length;
     // mobile: ‹ n/7 › sits beside the title
-    $('h2', el.body).insertAdjacentHTML('afterend', `<span class="mpager">
-        <button data-go="-1" aria-label="Previous page" ${page === 0 ? 'disabled' : ''}><span class="i i-up rot-left"></span></button>
-        <b>${page + 1}/${project.pages.length}</b>
-        <button data-go="1" aria-label="Next page" ${page === project.pages.length - 1 ? 'disabled' : ''}><span class="i i-up rot-right"></span></button></span>`);
-    const h2 = $('h2', el.body), pager = $('.mpager', el.body);
-    const head = document.createElement('div'); head.className = 'pg-head';
-    h2.before(head); head.append(h2, pager);
+    const pager = `<span class="mpager">
+        <button data-go="-1" aria-label="Previous page" ${i === 0 ? 'disabled' : ''}><span class="i i-up rot-left"></span></button>
+        <b>${i + 1}/${n}</b>
+        <button data-go="1" aria-label="Next page" ${i === n - 1 ? 'disabled' : ''}><span class="i i-up rot-right"></span></button></span>`;
+    return isOverviewPage(i) ? overviewHTML(project.overview, pager)
+        : `<div class="pg"><div class="pg-head"><h2>${pg.title}</h2>${pager}</div><p class="body">${pg.body || ''}</p></div>`;
+}
+
+function renderSide() {
+    el.body.classList.toggle('centered', !isOverviewPage(page));
+    el.body.innerHTML = sideHTML(page);
     el.counter.textContent = `${page + 1}/${project.pages.length}`;
     el.counter.classList.remove('tick'); void el.counter.offsetWidth; el.counter.classList.add('tick');
     el.prev.disabled = page === 0;
@@ -156,7 +158,7 @@ function renderPhone(dir) {
     const d = 60 * dir;
     const opts = { duration: 550, easing: 'cubic-bezier(.2,.8,.2,1)' };
     // desktop flips vertically (scroll); mobile slides sideways (swipe)
-    const at = off => matchMedia('(max-width: 900px)').matches
+    const at = off => mobileMQ.matches
         ? `translateX(${off}px)` : `translateY(${off}px)`;
     old.animate([{ transform: 'none', opacity: 1 }, { transform: `${at(-d)} scale(.94)`, opacity: 0 }], opts)
         .finished.catch(() => {}).then(() => old.remove());
@@ -171,7 +173,26 @@ function renderProject() {
     el.logo.src = project.logo;
     renderLikes();
     renderSide();
+    fitSide();
 }
+
+/* Mobile: the sheet under the phone is as tall as the project's longest
+   page, so flipping pages never resizes (and jumps) the phone above it. */
+function fitSide() {
+    el.body.style.minHeight = '';
+    if (!mobileMQ.matches) return;
+    const probe = el.body.cloneNode(false);
+    probe.removeAttribute('id');
+    probe.setAttribute('aria-hidden', 'true');
+    Object.assign(probe.style, { position: 'absolute', visibility: 'hidden', pointerEvents: 'none', width: el.body.offsetWidth + 'px', maxHeight: 'none' });
+    el.body.after(probe);
+    let h = 0;
+    project.pages.forEach((_, i) => { probe.innerHTML = sideHTML(i); h = Math.max(h, probe.offsetHeight); });
+    probe.remove();
+    el.body.style.minHeight = Math.min(h, innerHeight * .46) + 'px'; // its max-height is 46dvh
+}
+let fitTimer;
+addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitSide, 120); });
 
 /* ── NAVIGATION ── */
 let lastFlip = 0;
@@ -198,16 +219,22 @@ function switchProject(i, dir = 1) {
     closeComment();
 }
 
-// wheel / trackpad: one flip per gesture
-let wheelAcc = 0, wheelTimer;
+// wheel / trackpad: one flip per gesture. After a trackpad swipe the
+// browser keeps sending fading "momentum" events for a second or more;
+// they belong to the swipe that already flipped, so stay locked until
+// the wheel goes quiet, or a new swipe starts (the deltas grow again).
+let wheelAcc = 0, wheelTimer, wheelLock = false, lastDelta = 0;
 $('.proj').addEventListener('wheel', e => {
     if (e.target.closest('.side-body') && el.body.scrollHeight > el.body.clientHeight) return;
     e.preventDefault();
     clearTimeout(wheelTimer);
-    wheelTimer = setTimeout(() => { wheelAcc = 0; }, 160);
-    if (performance.now() - lastFlip < 650) return;
+    wheelTimer = setTimeout(() => { wheelAcc = 0; wheelLock = false; }, 200);
+    const d = Math.abs(e.deltaY), fresh = d > 20 && d > lastDelta * 2;
+    lastDelta = d;
+    if (wheelLock && !(fresh && performance.now() - lastFlip > 400)) return;
+    wheelLock = false;
     wheelAcc += e.deltaY;
-    if (Math.abs(wheelAcc) > 40) { go(Math.sign(wheelAcc)); wheelAcc = 0; }
+    if (Math.abs(wheelAcc) > 40) { go(Math.sign(wheelAcc)); wheelAcc = 0; wheelLock = true; lastFlip = performance.now(); }
 }, { passive: false });
 
 // touch: vertical swipe on the stage
@@ -277,26 +304,17 @@ $('#comment').addEventListener('submit', e => {
 });
 el.input.addEventListener('keydown', e => { if (e.key === 'Escape') closeComment(); });
 
-/* ── PROJECT MENU + SEARCH ── */
-function searchText(p) {
-    return [p.title, ...p.tags, ...p.pages.map(pg => `${pg.title} ${pg.body || ''}`)].join(' ').toLowerCase();
-}
-function renderMenu(q = '') {
-    q = q.trim().toLowerCase();
-    const items = PROJECTS.map((p, i) => ({ p, i })).filter(({ p }) => !q || searchText(p).includes(q));
-    el.plist.innerHTML = items.length ? items.map(({ p, i }) => `
+/* ── PROJECT MENU ── */
+function renderMenu() {
+    el.plist.innerHTML = PROJECTS.map((p, i) => `
         <a class="prow${i === pIndex ? ' on' : ''}" href="?p=${p.slug}" data-i="${i}">
             <img class="logo" src="${p.logo}" alt="">
-            <div><div class="pt">${p.title}</div><div class="tags">${p.tags.map(t => `<span>${t}</span>`).join('')}</div></div>
-        </a>`).join('') : `<p class="empty">nothing matches “${q}”</p>`;
+            <div><div class="pt">${p.title}</div><div class="desc">${p.desc}</div></div>
+        </a>`).join('');
 }
-function openMenu() { el.search.value = ''; renderMenu(); openOverlay(el.menu); }
+function openMenu() { renderMenu(); openOverlay(el.menu); }
 $('#projmenu').addEventListener('click', openMenu);
 $('#mpill').addEventListener('click', openMenu);
-el.search.addEventListener('input', () => renderMenu(el.search.value));
-el.search.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { const first = $('.prow', el.plist); if (first) first.click(); }
-});
 el.plist.addEventListener('click', e => {
     const row = e.target.closest('.prow');
     if (!row) return;
@@ -313,7 +331,6 @@ shortcut(['Space'], 'play / pause video', () => { const v = $('video', currentSl
 shortcut(['L'], 'like', toggleLike);
 shortcut(['Q'], 'ask a question', openComment);
 shortcut(['M'], 'projects menu', openMenu);
-shortcut(['/'], 'search projects', () => { openMenu(); setTimeout(() => el.search.focus(), 60); });
 shortcut(['Esc'], 'back to projects', () => {
     if (!scPop.hidden) { toggleShortcuts(false); return; }
     if (el.foot.classList.contains('commenting')) { closeComment(); return; }
