@@ -39,7 +39,8 @@ body.home { overflow: hidden; }
 .ext:hover::after { transform: translate(2px, -2px); }
 
 /* "Or else...": looks like the other links; each click swaps the words */
-.orelse { margin-top: 24px; min-height: 19px; } /* Figma: grouped with the contact links, 48px below the paragraphs */
+.orelse { margin-top: 24px; height: 19px; } /* Figma: grouped with the contact links, 48px below the paragraphs */
+.orelse:has(.oe-embed), .intro[lang="ur"] .orelse { height: auto; } /* Nastaliq lines run taller */ /* Spotify's own player, if the preview won't load */
 .oe {
     text-align: start;
     text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; text-decoration-skip-ink: none;
@@ -54,14 +55,14 @@ body.home { overflow: hidden; }
     --p: 0;
     position: relative;
     display: inline-flex; align-items: center; gap: 8px;
-    padding-bottom: 4px;
+    height: 19px; /* one line, same as the words, so the gaps above and below don't move */
     animation: oe-swap .45s var(--spring);
 }
-.oe-player::before, .oe-player::after { content: ''; position: absolute; left: 0; bottom: 0; height: 1px; background: currentColor; }
+.oe-player::before, .oe-player::after { content: ''; position: absolute; left: 0; bottom: -3px; height: 1px; background: currentColor; }
 .oe-player::before { right: 0; opacity: .25; }
 .oe-player::after { width: calc(var(--p) * 100%); transition: width .25s linear; }
 .oe-mute {
-    width: 28px; height: 28px; margin: -4px 0 -4px -6px;
+    width: 28px; height: 28px; margin: -5px 0 -5px -6px;
     display: grid; place-items: center;
     border-radius: 4px;
     transition: background-color .2s, transform .2s var(--spring);
