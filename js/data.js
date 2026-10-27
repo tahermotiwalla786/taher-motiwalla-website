@@ -11,7 +11,7 @@ const PROJECTS = [
         logo: 'assets/img/gh-logo.png',
         tags: ['motion', 'interaction', 'haptics'],
         cardTags: ['0→1', 'motion', 'haptics'],
-        cover: { type: 'video', src: 'assets/video/toggle-on.mp4' },
+        cover: { type: 'video', src: 'assets/video/dh-cover-loop.mp4' },
         overview: {
             category: ['motion', 'interaction', 'haptics'],
             duration: '1-2 months',
@@ -53,7 +53,7 @@ const PROJECTS = [
         logo: 'assets/img/gh-logo.png',
         tags: ['data viz', 'planning'],
         cardTags: ['0→1', 'data viz'],
-        cover: { type: 'video', src: 'assets/video/bt-schedule-home.mp4' },
+        cover: { type: 'video', src: 'assets/video/bt-cover-loop.mp4' },
         pages: [
             { title: 'Overview',
               body: "Scheduling is how drivers plan their shifts. We redesigned it to add real utility, making it easier for drivers to plan and optimize their work week.",
@@ -144,7 +144,7 @@ const HOBBIES = {
 /* Home: "Or else..." steps through these, in order, one per click.
    Clicking the last one turns it into a player for SONG (Hindi and
    Urdu versions live in lang.js). */
-const OR_ELSE = ['Or else...', 'buddy you dont wanna find out', 'Grrrrrrrrrrr', 'jk hehe'];
+const OR_ELSE = ['Or else...', 'buddy you don’t wanna find out', 'Grrrrrrrrrrr', 'jk hehe'];
 const SONG = {
     title: 'Can We Talk', artist: 'Tevin Campbell',
     preview: 'https://p.scdn.co/mp3-preview/06750f88f19c0113787d2e6715484225e52d0a9e', // Spotify's 30s preview

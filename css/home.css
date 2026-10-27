@@ -343,8 +343,8 @@ body:not(.hover-hold) .card:hover .card-meta, .card:focus-within .card-meta { op
 .mproj.open { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
 .mproj.instant { transition: none; }
 body.mproj-open { overflow: hidden; }
-/* the theme toggle stays where it was, on top of the projects page */
-.mproj-open .theme-toggle { position: fixed; z-index: 60; }
+/* the theme toggle sits where it was, and scrolls with the page (home.js moves it in) */
+.mproj .theme-toggle { top: 64px; right: 24px; }
 .mproj-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .mproj .mret { align-self: auto; }
 
@@ -376,9 +376,13 @@ body.mproj-open { overflow: hidden; }
 .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 20px; margin-top: 24px; }
 .mproj[data-view="list"] .mgrid { grid-template-columns: 1fr; gap: 40px; padding: 0 24px; }
 .mcard { display: flex; flex-direction: column; gap: 16px; text-decoration: none; animation: m-in .5s var(--ease) both; animation-delay: calc(var(--i) * 60ms); }
-.mcard:nth-child(1) { view-transition-name: mcard-1; } .mcard:nth-child(2) { view-transition-name: mcard-2; }
-.mcard:nth-child(3) { view-transition-name: mcard-3; } .mcard:nth-child(4) { view-transition-name: mcard-4; }
-.mcard:nth-child(5) { view-transition-name: mcard-5; } .mcard:nth-child(6) { view-transition-name: mcard-6; }
+.mcard:nth-child(1) .phone { view-transition-name: mphone-1; } .mcard:nth-child(2) .phone { view-transition-name: mphone-2; }
+.mcard:nth-child(3) .phone { view-transition-name: mphone-3; } .mcard:nth-child(4) .phone { view-transition-name: mphone-4; }
+.mcard:nth-child(5) .phone { view-transition-name: mphone-5; } .mcard:nth-child(6) .phone { view-transition-name: mphone-6; }
+::view-transition-old(root) { display: none; }
+::view-transition-new(root) { animation: none; }
+::view-transition-group(*) { animation-duration: .45s; animation-timing-function: var(--ease); }
+.mproj[data-view="list"] .mcard .mcap { animation: m-in .35s var(--ease) .15s both; }
 .mcard .phone { width: 100%; transition: transform .35s var(--spring), background-color .4s; }
 .mcard:active .phone { transform: translateY(-6px); }
 .mcard .mcap { display: none; justify-content: center; }

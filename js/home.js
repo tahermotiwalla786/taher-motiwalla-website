@@ -302,10 +302,8 @@ function showMobile(k) {
         previously.classList.remove('m-in'); void previously.offsetWidth; previously.classList.add('m-in');
         return;
     }
-    const h = HOBBIES[k];
     mdetail.innerHTML = `<button class="pill mret" data-act="mreturn"><span class="i i-return"></span>return</button>
-        <div class="mbox mbox-${k}">${VIEWS[k]()}</div>
-        <div class="mcap"><div class="txt"><b>${h.caption[0]}</b><span>${h.caption[1]}</span></div></div>`;
+        <div class="mbox mbox-${k}">${VIEWS[k]()}</div>`;
     previously.hidden = true;
     mdetail.hidden = false;
     mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
@@ -320,6 +318,9 @@ const ICON_GRID = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="
 const ICON_LIST = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3" width="15" height="5.5" rx="1.5"/><rect x="2.5" y="11.5" width="15" height="5.5" rx="1.5"/></g></svg>';
 
 let mproj = null;
+// while the projects page is open the theme toggle lives in it, so it scrolls away
+const themeBtn = $('.theme-toggle'), themeHome = document.createComment('theme-toggle');
+themeBtn.after(themeHome);
 function buildMProj() {
     mproj = document.createElement('div');
     mproj.className = 'mproj';
@@ -364,6 +365,7 @@ function openMProj(instant) {
     mproj.classList.toggle('instant', !!instant);
     mproj.scrollTop = 0;
     mproj.classList.add('open');
+    mproj.prepend(themeBtn);
     document.body.classList.add('mproj-open');
     history.replaceState(null, '', '#projects');
     hintFirst($('.mcard', mproj));
@@ -371,6 +373,7 @@ function openMProj(instant) {
 function closeMProj() {
     if (!mproj) return;
     mproj.classList.remove('open', 'instant');
+    themeHome.before(themeBtn);
     document.body.classList.remove('mproj-open');
     history.replaceState(null, '', location.pathname);
 }

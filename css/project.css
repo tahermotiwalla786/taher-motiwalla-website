@@ -299,10 +299,10 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
     .proj { display: flex; flex-direction: column; border: 0; }
     .stage { flex: 1; }
     .stage-media { flex: 1; height: auto; }
-    .phones { inset: 16px 0 68px; }            /* bottom room for the scrubber (+16px sheet overlap) */
+    .phones { inset: 16px 0 32px; }            /* 16px of picture above the phone and below it (32 − 16 sheet overlap) */
     .slot { --h: 100cqh; }
     .slot.scrub-on .phone { transform: none; } /* mobile: scrubber has its own room */
-    .scrubber { top: calc(100% + 14px); }
+    .scrubber { top: calc(100% - 8px); }        /* track centred in the 16px gap */
 
     .side {
         position: relative; z-index: 3;
