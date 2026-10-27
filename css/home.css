@@ -39,7 +39,7 @@ body.home { overflow: hidden; }
 .ext:hover::after { transform: translate(2px, -2px); }
 
 /* "Or else...": looks like the other links; each click swaps the words */
-.orelse { margin-top: -6px; min-height: 19px; } /* same spacing as the paragraphs */
+.orelse { margin-top: 24px; min-height: 19px; } /* Figma: grouped with the contact links, 48px below the paragraphs */
 .oe {
     text-align: start;
     text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; text-decoration-skip-ink: none;

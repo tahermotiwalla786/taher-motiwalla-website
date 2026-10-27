@@ -1,6 +1,6 @@
 /* ── LANGUAGE ────────────────────────────
-   EN / हिन्दी / اردو for the home-page bio. The highlighted words and the
-   Grubhub link are the same live elements (their hover and click handlers
+   EN / हिन्दी / اردو for the home-page bio. The highlighted words are
+   the same live elements (their hover and click handlers
    stay put); only their labels and the words around them change. Company and project
    names stay in English. Urdu flips only the text block to right-to-left,
    not the page. Fonts load the first time a script is picked.
@@ -11,33 +11,32 @@ const LANG = {
         label: 'हिन्दी',
         name: 'ताहेर मोटीवाला',
         p: [
-            'मैं एक प्रोडक्ट डिज़ाइनर हूँ और फ़िलहाल {gh} में काम कर रहा हूँ।',
+            'मैं एक प्रोडक्ट डिज़ाइनर हूँ और फ़िलहाल Grubhub में काम कर रहा हूँ।',
             'या तो मेरा डिज़ाइन {grubhub} देखिए।',
             'या मेरी खींची कुछ {photo} देखिए, जिनसे मुझे {draw} के लिए कुछ मिल जाता है, और कभी-कभी तो मैं उन्हें {paint} की कोशिश भी करता हूँ।',
         ],
         words: { grubhub: 'काम', photo: 'तस्वीरें', draw: 'ड्रॉ करने', paint: 'पेंट करने' },
         email: 'ईमेल', linkedin: 'LinkedIn', previously: 'पहले',
         residing: 'ब्रुकलिन, NY में रहता हूँ।',
-        orelse: ['वरना...', 'चिल्ल्ल्ल', 'भाई सच में रुक जा', 'मुझे गुस्सा मत दिलाओ ना', 'ग्र्र्र्र्र्र्र', 'मैं चेतावनी दे रहा हूँ!!', 'मज़ाक था, हीहे'],
+        orelse: ['वरना...', 'भाई, तुम जानना नहीं चाहोगे', 'ग्र्र्र्र्र्र्र', 'मज़ाक था, हीहे'],
     },
     ur: {
         label: 'اردو', rtl: true,
         name: 'طاہر موٹی والا',
         p: [
-            'میں ایک پروڈکٹ ڈیزائنر ہوں اور فی الحال {gh} میں کام کر رہا ہوں۔',
+            'میں ایک پروڈکٹ ڈیزائنر ہوں اور فی الحال Grubhub میں کام کر رہا ہوں۔',
             'یا تو میرا ڈیزائن {grubhub} دیکھیں۔',
             'یا میری کھینچی ہوئی کچھ {photo} دیکھیں، جن سے مجھے {draw} کے لیے کچھ مل جاتا ہے، اور کبھی کبھی تو میں انہیں {paint} کی کوشش بھی کرتا ہوں۔',
         ],
         words: { grubhub: 'کام', photo: 'تصویریں', draw: 'ڈرا کرنے', paint: 'پینٹ کرنے' },
         email: 'ای میل', linkedin: 'LinkedIn', previously: 'پہلے',
         residing: 'بروکلین، NY میں رہتا ہوں۔',
-        orelse: ['ورنہ...', 'چِلّل', 'بھائی سچ میں رک جا', 'مجھے غصہ مت دلاؤ نا', 'گرررررر', 'میں خبردار کر رہا ہوں!!', 'مذاق تھا، ہی ہی'],
+        orelse: ['ورنہ...', 'بھائی، تم جاننا نہیں چاہو گے', 'گرررررر', 'مذاق تھا، ہی ہی'],
     },
 };
 
 const intro = $('.intro');
 const paras = $$('.intro > p');
-const gh = $('.intro > p .ext'); // Grubhub ↗ stays a link in every language
 const L = {
     h1: $('.intro h1'),
     email: $('.contact .ext:nth-child(1)'), linkedin: $('.contact .ext:nth-child(2)'),
@@ -50,7 +49,7 @@ const EN = {
     p: paras.map(p => [...p.childNodes]),
     words: Object.fromEntries(links.map(b => [b.dataset.panel, b.textContent])),
 };
-const tokenEl = k => k === 'gh' ? gh : links.find(b => b.dataset.panel === k);
+const tokenEl = k => links.find(b => b.dataset.panel === k);
 
 let fontsLoaded = false;
 function loadScriptFonts() {
