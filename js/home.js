@@ -26,12 +26,11 @@ const VIEWS = {
             <div class="card" data-slug="${p.slug}">
                 <a class="card-main" href="project.html?p=${p.slug}">
                     <div class="phone">${mediaHTML(p.cover, { autoplay: !canHover, placeholder: p.title + '<br>coming soon' })}</div>
-                    <div class="card-meta"><img class="logo" src="${p.logo}" alt=""><span class="t">${p.title}</span></div>
+                    <div class="card-meta">
+                        <div class="card-name"><img class="logo" src="${p.logo}" alt=""><span class="t">${p.title}</span></div>
+                        <p class="d">${p.desc}</p>
+                    </div>
                 </a>
-                <div class="card-acts">
-                    <a class="act" href="project.html?p=${p.slug}" aria-label="Read the ${p.title} case study"><span class="i i-book"></span></a>
-                    <button class="act" data-act="request" aria-label="Request details on ${p.title}"><span class="i i-chat"></span></button>
-                </div>
             </div>`).join('');
         return `<div class="pv pv-work">
             <button class="pill top-pill" data-act="toggle-expand">
@@ -99,6 +98,21 @@ function setExpanded(on) {
     document.body.classList.toggle('expanded', on);
     history.replaceState(null, '', on ? '#projects' : location.pathname);
     updateScrolls();
+    if (on) hintFirst($('.card', panel));
+}
+
+/* First time the projects open (once a visit), the first phone lifts
+   and shows its name, so it's clear the phones lead somewhere. */
+function hintFirst(card) {
+    if (!card || store.sget('hinted')) return;
+    store.sset('hinted', '1');
+    card.classList.add('hint');
+    const done = e => {
+        if (!e.animationName.includes('hint')) return; // the card's own entrance ends first
+        card.classList.remove('hint');
+        card.removeEventListener('animationend', done);
+    };
+    card.addEventListener('animationend', done);
 }
 
 /* The row is a carousel only if the phones overflow at their minimum
@@ -142,7 +156,7 @@ links.forEach(l => {
     l.addEventListener('click', e => {
         e.stopPropagation();
         const k = l.dataset.panel;
-        if (isMobile()) { showMobile(mKey === k ? null : k); return; }
+        if (isMobile()) { k === 'grubhub' ? openMProj() : showMobile(mKey === k ? null : k); return; }
         if (k === 'grubhub') { setExpanded(true); return; }
         pinKey = pinKey === k ? null : k;
         hoverKey = canHover && pinKey === null ? null : hoverKey;
@@ -164,8 +178,6 @@ panel.addEventListener('click', e => {
 
     if (shownKey === 'grubhub') {
         if (!isExpanded()) { e.preventDefault(); setExpanded(true); return; }
-        const card = e.target.closest('.card');
-        if (act === 'request') { openRequest(PROJECTS.find(p => p.slug === card.dataset.slug)); return; }
         const link = e.target.closest('a');
         if (link) { e.preventDefault(); requireUnlock(() => location.href = link.href); }
         return;
@@ -192,37 +204,6 @@ panel.addEventListener('pointerout', e => {
     $('video', card)?.pause();
 });
 
-/* ── REQUEST DETAILS ──
-   No backend: Send opens a pre-filled email in the visitor's mail app. */
-function openRequest(p) {
-    let o = $('#request');
-    if (!o) {
-        o = document.createElement('div');
-        o.className = 'overlay'; o.id = 'request'; o.setAttribute('aria-hidden', 'true');
-        o.innerHTML = `<div class="sheet" role="dialog" aria-label="Request details">
-            <div class="sheet-head">Request <button data-close aria-label="Close"><span class="i i-close"></span></button></div>
-            <form class="req">
-                <p class="req-for"></p>
-                <label>name<input name="name" autocomplete="name" required></label>
-                <label>email<input name="email" type="email" autocomplete="email" required></label>
-                <label>note<textarea name="note" rows="4" placeholder="what would you like to know?"></textarea></label>
-                <button class="pill send" type="submit">send</button>
-            </form></div>`;
-        document.body.append(o);
-    }
-    const form = $('form', o);
-    $('.req-for', o).textContent = `more details and the full case study for ${p.title.toLowerCase()}. send opens your email app.`;
-    form.onsubmit = e => {
-        e.preventDefault();
-        const f = new FormData(form);
-        const body = `${f.get('note') || 'I\'d love to see the full case study.'}\n\n${f.get('name')}\n${f.get('email')}`;
-        location.href = `${LINKS.email}?subject=${encodeURIComponent('Case study request: ' + p.title)}&body=${encodeURIComponent(body)}`;
-        closeOverlay(o);
-        toast('opening your email app');
-    };
-    openOverlay(o);
-}
-
 /* horizontal scroll with a normal mouse wheel */
 panel.addEventListener('wheel', e => {
     const row = e.target.closest('.cards');
@@ -242,7 +223,8 @@ function scrollCards(dir) {
 shortcut(['P'], 'projects', () => setExpanded(!isExpanded()));
 shortcut(['←', '→'], 'scroll projects', e => { if (!isExpanded()) setExpanded(true); else scrollCards(e.key === 'ArrowLeft' ? -1 : 1); });
 shortcut(['Esc'], 'close / back', () => {
-    if (isExpanded()) setExpanded(false);
+    if (mproj?.classList.contains('open')) closeMProj();
+    else if (isExpanded()) setExpanded(false);
     else { pinKey = null; hoverKey = null; render(); }
 });
 
@@ -292,16 +274,10 @@ tick();
 setTimeout(() => { tick(); setInterval(tick, 1000); }, 1000 - Date.now() % 1000); // on the second
 
 /* ── MOBILE ──────────────────────────────
-   Tapping a highlighted word swaps "previously" for a
-   return pill + card + caption. Grubhub lists the projects. */
+   Tapping a hobby word swaps "previously" for a return pill + card +
+   caption. Tapping "projects" opens them on their own page (an
+   overlay), as a grid of phones or a list with names. */
 let mKey = null;
-function mobileWork() {
-    return `<div class="mcards">${PROJECTS.map((p, i) => `
-        <a class="mcard" href="project.html?p=${p.slug}" style="--i:${i}">
-            <div class="mbox"><div class="phone">${mediaHTML(p.cover, { placeholder: p.title + '<br>coming soon' })}</div></div>
-            <div class="mcap proj"><img class="logo" src="${p.logo}" alt=""><div class="txt"><b>${p.title}</b></div></div>
-        </a>`).join('')}</div>`;
-}
 function showMobile(k) {
     mKey = k;
     links.forEach(l => l.classList.toggle('active', l.dataset.panel === k));
@@ -313,10 +289,9 @@ function showMobile(k) {
         return;
     }
     const h = HOBBIES[k];
-    const body = k === 'grubhub' ? mobileWork()
-        : `<div class="mbox mbox-${k}">${VIEWS[k]()}</div>
-           <div class="mcap"><div class="txt"><b>${h.caption[0]}</b><span>${h.caption[1]}</span></div></div>`;
-    mdetail.innerHTML = `<button class="pill mret" data-act="mreturn"><span class="i i-return"></span>return</button>${body}`;
+    mdetail.innerHTML = `<button class="pill mret" data-act="mreturn"><span class="i i-return"></span>return</button>
+        <div class="mbox mbox-${k}">${VIEWS[k]()}</div>
+        <div class="mcap"><div class="txt"><b>${h.caption[0]}</b><span>${h.caption[1]}</span></div></div>`;
     previously.hidden = true;
     mdetail.hidden = false;
     mdetail.classList.remove('m-in'); void mdetail.offsetWidth; mdetail.classList.add('m-in');
@@ -324,19 +299,134 @@ function showMobile(k) {
 }
 mdetail.addEventListener('click', e => {
     e.stopPropagation();
-    const act = e.target.closest('[data-act]')?.dataset.act;
-    if (act === 'mreturn') { showMobile(null); return; }
-    const card = e.target.closest('.mcard');
-    if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
+    if (e.target.closest('[data-act="mreturn"]')) showMobile(null);
 });
+
+const ICON_GRID = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></g></svg>';
+const ICON_LIST = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3" width="15" height="5.5" rx="1.5"/><rect x="2.5" y="11.5" width="15" height="5.5" rx="1.5"/></g></svg>';
+
+let mproj = null;
+function buildMProj() {
+    mproj = document.createElement('div');
+    mproj.className = 'mproj';
+    mproj.setAttribute('role', 'dialog');
+    mproj.setAttribute('aria-label', 'Projects');
+    mproj.innerHTML = `<div class="mproj-bar">
+            <button class="pill mret" data-act="mclose"><span class="i i-return"></span>return</button>
+            <div class="vtoggle" role="radiogroup" aria-label="Layout">
+                <button role="radio" data-view="grid" aria-label="Grid">${ICON_GRID}</button>
+                <button role="radio" data-view="list" aria-label="List">${ICON_LIST}</button>
+            </div>
+        </div>
+        <div class="mgrid">${PROJECTS.map((p, i) => `
+            <a class="mcard" href="project.html?p=${p.slug}" style="--i:${i}">
+                <div class="phone">${mediaHTML(p.cover, { placeholder: p.title + '<br>coming soon' })}</div>
+                <div class="mcap proj"><img class="logo" src="${p.logo}" alt=""><div class="txt"><b>${p.title}</b><span>${p.desc}</span></div></div>
+            </a>`).join('')}</div>`;
+    mproj.addEventListener('click', e => {
+        const act = e.target.closest('[data-act]')?.dataset.act;
+        if (act === 'mclose') { closeMProj(); return; }
+        const v = e.target.closest('[data-view]')?.dataset.view;
+        if (v) { setMView(v, true); return; }
+        const card = e.target.closest('.mcard');
+        if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
+    });
+    $('.home-grid').append(mproj);
+    setMView(store.get('mview') || 'grid');
+}
+function setMView(v, animate) {
+    const apply = () => {
+        mproj.dataset.view = v;
+        $$('[data-view]', mproj).forEach(b => b.setAttribute('aria-checked', b.dataset.view === v));
+    };
+    store.set('mview', v);
+    // phones glide to their new spots where the browser can do it
+    if (animate && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(apply);
+    else apply();
+}
+function openMProj(instant) {
+    if (!mproj) buildMProj();
+    showMobile(null);
+    mproj.classList.toggle('instant', !!instant);
+    mproj.scrollTop = 0;
+    mproj.classList.add('open');
+    document.body.classList.add('mproj-open');
+    history.replaceState(null, '', '#projects');
+    hintFirst($('.mcard', mproj));
+}
+function closeMProj() {
+    if (!mproj) return;
+    mproj.classList.remove('open', 'instant');
+    document.body.classList.remove('mproj-open');
+    history.replaceState(null, '', location.pathname);
+}
 // rotating to desktop width: drop the mobile state
-mobileMQ.addEventListener('change', () => { if (!isMobile()) showMobile(null); });
+mobileMQ.addEventListener('change', () => { if (!isMobile()) { showMobile(null); closeMProj(); } });
 
 /* deep link from project pages: index.html#projects */
 if (location.hash === '#projects' && isMobile()) {
-    showMobile('grubhub');
+    openMProj(true);
 } else if (location.hash === '#projects') {
     document.documentElement.classList.add('no-anim');
     setExpanded(true);
     requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')));
+}
+
+/* ── OR ELSE ──
+   Each click shows the next line of OR_ELSE (in the bio's language).
+   Clicking the last one turns the words into a player: the song starts
+   muted, its underline fills as it plays, and a tap unmutes it. */
+const oe = $('#orelse');
+let oeStep = 0;
+const oeLines = () => LANG[$('.intro').lang]?.orelse || OR_ELSE; // LANG: lang.js
+function renderOrElse() {
+    if (oe.isConnected) oe.textContent = oeLines()[oeStep];
+}
+oe.addEventListener('click', e => {
+    e.stopPropagation();
+    if (oeStep < OR_ELSE.length - 1) {
+        oeStep++;
+        renderOrElse();
+        oe.classList.remove('swap'); void oe.offsetWidth; oe.classList.add('swap');
+        return;
+    }
+    playSong();
+});
+
+const ICON_MUTED = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="m13 7.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const ICON_SOUND = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13 7a4 4 0 0 1 0 6m2.5-8.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const ICON_AGAIN = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4.5 10a5.5 5.5 0 1 0 1.8-4.1M4.5 3.5v3h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function playSong() {
+    const box = oe.parentElement;
+    box.innerHTML = `<div class="oe-player">
+        <button class="oe-mute" aria-label="Unmute">${ICON_MUTED}</button>
+        <span class="oe-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="oe-t">${SONG.title} <span class="oe-a">${SONG.artist}</span></span>
+        <a class="ext oe-sp" href="${SONG.spotify}" target="_blank" rel="noopener">Spotify</a>
+        <audio src="${SONG.preview}" muted playsinline preload="auto"></audio>
+    </div>`;
+    const pl = $('.oe-player', box), a = $('audio', pl), btn = $('.oe-mute', pl);
+    const sync = () => {
+        const ended = a.ended, muted = a.muted || a.paused;
+        pl.classList.toggle('live', !muted && !ended);
+        btn.innerHTML = ended ? ICON_AGAIN : muted ? ICON_MUTED : ICON_SOUND;
+        btn.setAttribute('aria-label', ended ? 'Play again' : muted ? 'Unmute' : 'Mute');
+    };
+    a.muted = true; // the attribute alone doesn't stick in every browser
+    a.play().catch(() => {});
+    a.addEventListener('timeupdate', () => pl.style.setProperty('--p', a.duration ? a.currentTime / a.duration : 0));
+    ['play', 'pause', 'ended', 'volumechange'].forEach(ev => a.addEventListener(ev, sync));
+    // the preview can disappear from Spotify's servers: fall back to their player
+    a.addEventListener('error', () => {
+        box.innerHTML = `<iframe class="oe-embed" title="${SONG.title} by ${SONG.artist} on Spotify" src="${SONG.spotify.replace('/track/', '/embed/track/')}?theme=0" height="80" allow="autoplay; clipboard-write; encrypted-media" loading="lazy"></iframe>`;
+    });
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (a.ended) { a.currentTime = 0; a.muted = false; a.play().catch(() => {}); return; }
+        if (a.paused) { a.muted = false; a.play().catch(() => {}); return; }
+        a.muted = !a.muted;
+    });
+    sync();
+    btn.focus();
 }

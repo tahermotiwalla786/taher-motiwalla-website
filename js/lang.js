@@ -18,6 +18,7 @@ const LANG = {
         words: { grubhub: 'प्रोजेक्ट्स', photo: 'तस्वीरें', draw: 'ड्रॉ करने', paint: 'पेंट करने' },
         email: 'ईमेल', linkedin: 'LinkedIn', previously: 'पहले',
         residing: 'ब्रुकलिन, NY में रहता हूँ।',
+        orelse: ['वरना...', 'चिल्ल्ल्ल', 'भाई सच में रुक जा', 'मुझे गुस्सा मत दिलाओ ना', 'ग्र्र्र्र्र्र्र', 'मैं चेतावनी दे रहा हूँ!!', 'मज़ाक था, प्यार करता हूँ', 'क्या हम बात कर सकते हैं'],
     },
     ur: {
         label: 'اردو', rtl: true,
@@ -30,6 +31,7 @@ const LANG = {
         words: { grubhub: 'پروجیکٹس', photo: 'تصویریں', draw: 'ڈرا کرنے', paint: 'پینٹ کرنے' },
         email: 'ای میل', linkedin: 'LinkedIn', previously: 'پہلے',
         residing: 'بروکلین، NY میں رہتا ہوں۔',
+        orelse: ['ورنہ...', 'چِلّل', 'بھائی سچ میں رک جا', 'مجھے غصہ مت دلاؤ نا', 'گرررررر', 'میں خبردار کر رہا ہوں!!', 'مذاق تھا، پیار کرتا ہوں', 'کیا ہم بات کر سکتے ہیں'],
     },
 };
 
@@ -86,6 +88,7 @@ function setLang(code) {
         }));
         paras.forEach((p, i) => p.replaceChildren(...EN.p[i]));
     }
+    renderOrElse(); // home.js
     $$('.lang button').forEach(b => {
         const on = (b.lang || 'en') === lang;
         b.classList.toggle('on', on);
