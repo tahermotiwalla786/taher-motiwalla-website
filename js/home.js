@@ -347,14 +347,14 @@ function buildMProj() {
         if (card) { e.preventDefault(); requireUnlock(() => location.href = card.href); }
     });
     $('.home-grid').append(mproj);
-    setMView(store.get('mview') || 'grid');
+    setMView(store.get('mlayout') || 'list'); // rows first; new key so earlier grid picks don't stick
 }
 function setMView(v, animate) {
     const apply = () => {
         mproj.dataset.view = v;
         $$('[data-view]', mproj).forEach(b => b.setAttribute('aria-checked', b.dataset.view === v));
     };
-    store.set('mview', v);
+    store.set('mlayout', v);
     // phones glide to their new spots where the browser can do it
     if (animate && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(apply);
     else apply();
