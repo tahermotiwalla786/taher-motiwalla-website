@@ -98,13 +98,26 @@ function setExpanded(on) {
     document.body.classList.toggle('expanded', on);
     history.replaceState(null, '', on ? '#projects' : location.pathname);
     updateScrolls();
-    if (on) hintFirst($('.card', panel));
+    if (on) holdHover(hintFirst($('.card', panel)));
+}
+
+/* The cursor is usually already somewhere over the row when the projects
+   open. Hover stays off until the phones have come in (and the first one
+   has done its hint), then waits for the mouse to actually move. */
+let holdTimer, holdId = 0;
+function holdHover(hinted) {
+    clearTimeout(holdTimer);
+    const id = ++holdId; // a reopen starts a fresh hold
+    document.body.classList.add('hover-hold');
+    holdTimer = setTimeout(() => document.addEventListener('pointermove', () => {
+        if (id === holdId) document.body.classList.remove('hover-hold');
+    }, { once: true }), hinted ? 2800 : 700);
 }
 
 /* First time the projects open (once a visit), the first phone lifts
    and shows its name, so it's clear the phones lead somewhere. */
 function hintFirst(card) {
-    if (!card || store.sget('hinted')) return;
+    if (!card || store.sget('hinted')) return false;
     store.sset('hinted', '1');
     card.classList.add('hint');
     const done = e => {
@@ -113,6 +126,7 @@ function hintFirst(card) {
         card.removeEventListener('animationend', done);
     };
     card.addEventListener('animationend', done);
+    return true;
 }
 
 /* The row is a carousel only if the phones overflow at their minimum
@@ -196,7 +210,7 @@ document.addEventListener('click', e => {
 /* project videos sit on their first frame until hovered */
 panel.addEventListener('pointerover', e => {
     const v = e.target.closest('.card')?.querySelector('video');
-    if (v && e.pointerType === 'mouse') v.play().catch(() => {});
+    if (v && e.pointerType === 'mouse' && !document.body.classList.contains('hover-hold')) v.play().catch(() => {});
 });
 panel.addEventListener('pointerout', e => {
     const card = e.target.closest('.card');
@@ -403,7 +417,6 @@ function playSong() {
         <button class="oe-mute" aria-label="Unmute">${ICON_MUTED}</button>
         <span class="oe-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span class="oe-t">${SONG.title} <span class="oe-a">${SONG.artist}</span></span>
-        <a class="ext oe-sp" href="${SONG.spotify}" target="_blank" rel="noopener">Spotify</a>
         <audio src="${SONG.preview}" muted playsinline preload="auto"></audio>
     </div>`;
     const pl = $('.oe-player', box), a = $('audio', pl), btn = $('.oe-mute', pl);

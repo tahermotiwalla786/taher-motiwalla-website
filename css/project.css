@@ -22,7 +22,6 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
 .topnav-r { display: flex; gap: 12px; }
 .topnav .circle-btn { width: 44px; height: 44px; }
 .topnav .circle-btn .i { width: 28px; height: 28px; }
-.topnav .circle-btn .i-linkedin { width: 25px; height: 25px; }
 
 .proj {
     flex: 1; min-height: 0;
@@ -151,7 +150,6 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
 /* shortcuts: a small popover above the button; the page stays undimmed */
 .sc-wrap { position: relative; justify-self: start; }
 .sc-btn { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; padding: 6px 8px; margin-left: -8px; border-radius: 4px; transition: background-color .2s; }
-.sc-btn .i { width: 24px; height: 24px; }
 .sc-btn:hover, .sc-btn[aria-expanded="true"] { background: var(--fg-faint); }
 .sc-pop {
     position: absolute; left: -8px; bottom: calc(100% + 16px); z-index: 20;
@@ -370,5 +368,4 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
     .mfoot .circle-btn { width: 40px; height: 40px; background: rgba(249,233,223,.2); }
     :root[data-theme="light"] .mfoot .circle-btn { background: var(--toggle-bg); }
     .mfoot .i { width: 26px; height: 26px; }
-    .mfoot .i-linkedin { width: 22px; height: 22px; }
 }

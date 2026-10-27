@@ -80,7 +80,6 @@ body.home { overflow: hidden; }
 @keyframes oe-bar { to { height: 12px; } }
 .oe-t { white-space: nowrap; }
 .oe-a { opacity: .5; margin-left: 2px; }
-.oe-sp { font-size: 14px; margin-left: 4px; }
 .oe-embed { width: 100%; border: 0; border-radius: 12px; }
 
 .contact { display: flex; gap: 16px; font-size: 14px; }
@@ -287,8 +286,8 @@ body.home { overflow: hidden; }
     opacity: 0; transform: translateY(-20px);
     transition: opacity .25s var(--ease), transform .4s var(--spring);
 }
-.card:hover .phone, .card:focus-within .phone { transform: translateY(var(--lift)); }
-.card:hover .card-meta, .card:focus-within .card-meta { opacity: 1; transform: translateY(-8px); }
+body:not(.hover-hold) .card:hover .phone, .card:focus-within .phone { transform: translateY(var(--lift)); }
+body:not(.hover-hold) .card:hover .card-meta, .card:focus-within .card-meta { opacity: 1; transform: translateY(-8px); }
 .card-name { display: flex; align-items: center; gap: 8px; max-width: 100%; }
 .card-meta .logo { width: 24px; height: 24px; border-radius: 4.8px; object-fit: cover; flex-shrink: 0; }
 .card-meta .t { font-size: 16px; font-weight: 500; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

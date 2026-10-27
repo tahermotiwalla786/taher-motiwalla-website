@@ -77,7 +77,6 @@ img, video { display: block; }
 .i-return  { --src: url(../assets/icons/return.svg); }
 .i-book    { --src: url(../assets/icons/book.svg); }
 .i-chat    { --src: url(../assets/icons/chat.svg); }
-.i-cmd     { --src: url(../assets/icons/command.svg); }
 .i-up-arrow{ --src: url(../assets/icons/arrow-up.svg); }
 .i-send    { --src: url(../assets/icons/send.svg); }
 .i-check   { --src: url(../assets/icons/check.svg); }
@@ -94,7 +93,6 @@ img, video { display: block; }
 }
 .circle-btn:hover { transform: scale(1.08); }
 .circle-btn:active { transform: scale(.94); }
-.circle-btn .i-linkedin { width: 28.8px; height: 28.8px; }
 
 /* Theme toggle: icon swaps with a little spin */
 .theme-toggle .i { transition: transform .3s var(--ease), opacity .16s; }

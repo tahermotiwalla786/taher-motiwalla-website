@@ -61,7 +61,7 @@ function buildShortcutSheet() {
         <div class="sheet-head">Shortcuts <button data-close aria-label="Close"><span class="i i-close"></span></button></div>
         <div class="shortcut-list">${SHORTCUTS.map(s =>
             `<div><span>${s.keys.map(k => `<span class="kbd">${k}</span>`).join('')}</span><span>${s.label}</span></div>`).join('')}
-            <div><span><span class="kbd">⌘</span><span class="kbd">?</span></span><span>show shortcuts</span></div>
+            <div><span><span class="kbd">?</span></span><span>show shortcuts</span></div>
         </div></div>`;
     document.body.append(o);
     return o;
@@ -94,18 +94,6 @@ function showShortcuts() {
     const o = $('#shortcuts') || buildShortcutSheet();
     o.classList.contains('open') ? closeOverlay(o) : openOverlay(o);
 }
-/* Tapping ⌘ on its own also shows them. ⌘ with anything else
-   (⌘C, ⌘-click, ⌘-tab away) is left alone. */
-let cmdAlone = false;
-document.addEventListener('keydown', e => { cmdAlone = e.key === 'Meta' && !e.repeat; });
-document.addEventListener('keyup', e => {
-    const tap = e.key === 'Meta' && cmdAlone;
-    cmdAlone = false;
-    if (tap && !e.target.closest?.('input, textarea, [contenteditable]') && !$('#gate.open')) showShortcuts();
-});
-document.addEventListener('pointerdown', () => { cmdAlone = false; });
-document.addEventListener('wheel', () => { cmdAlone = false; }, { passive: true }); // ⌘-scroll zooms
-window.addEventListener('blur', () => { cmdAlone = false; });
 
 /* ── PASSWORD GATE ──
    Same password + session flag as the previous site. The arrow (or

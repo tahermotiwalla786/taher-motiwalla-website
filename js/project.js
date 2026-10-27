@@ -341,7 +341,7 @@ KEYMAP.space = ' ';
 /* shortcuts popover (common.js sends ? here too) */
 const scPop = $('#sc-pop'), scBtn = $('#sc-btn');
 function toggleShortcuts(open = scPop.hidden) {
-    if (open) $('#sc-list').innerHTML = [...SHORTCUTS, { keys: ['⌘', '?'], label: 'show shortcuts' }].map(s =>
+    if (open) $('#sc-list').innerHTML = [...SHORTCUTS, { keys: ['?'], label: 'show shortcuts' }].map(s =>
         `<div><span>${s.keys.map(k => `<span class="kbd">${k}</span>`).join('')}</span><span>${s.label}</span></div>`).join('');
     scPop.hidden = !open;
     scBtn.setAttribute('aria-expanded', open);
