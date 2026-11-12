@@ -208,6 +208,7 @@ body.locked .topnav, body.locked .proj { filter: blur(10px); pointer-events: non
 .meta { display: flex; flex-direction: column; gap: 24px; }
 .meta h3 { font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
 .meta .row { display: flex; flex-wrap: wrap; gap: 8px 16px; text-transform: lowercase; }
+.meta .row.keep-case { text-transform: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; max-width: 300px; }
 .chip {
     padding: 8px 12px;

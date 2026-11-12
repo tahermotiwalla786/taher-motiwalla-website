@@ -25,7 +25,7 @@ function overviewHTML(o, pager) {
         <div><h3>Duration</h3><div class="row">${o.duration}</div></div>
         <div><h3>Team</h3><div class="chips">${o.team.map(t => `<span class="chip${t.accent ? ' accent' : ''}">${t.label}</span>`).join('')}</div></div>
         <div><h3>Release</h3><div class="row">${o.release}</div></div>
-        <div><h3>Impact</h3><div class="row">${o.impact}</div></div>
+        <div><h3>Impact</h3><div class="row keep-case">${o.impact}</div></div>
     </div></div>`;
 }
 
