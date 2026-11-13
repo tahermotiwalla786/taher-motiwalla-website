@@ -40,7 +40,7 @@ const PROJECTS = [
               media: { type: 'image', src: 'assets/img/best-times.png' } },
             { title: 'Mission prominence',
               body: 'Missions moved from buried below the fold to the bottom sheet, with progress shown at a glance so drivers can track bonuses as they work.',
-              media: null },
+              media: { type: 'image', src: 'assets/img/mission-prominence.png' } },
             { title: 'Hotspots & Boost zones',
               body: 'Hotspots and boost zones became tappable map layers with clear color and hierarchy, showing wait times and offer value without cluttering the map.',
               media: { type: 'video', src: 'assets/video/map-zones.mp4' } },
