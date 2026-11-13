@@ -165,6 +165,7 @@ const PAINTINGS = [
     'assets/hobbies/paintings/IMG_7021.jpg',
     'assets/hobbies/paintings/IMG_7054.jpg',
     'assets/hobbies/paintings/IMG_8333.jpg',
+    'assets/hobbies/paintings/rose-painting.jpg',
 ];
 const DRAWINGS = [
     'assets/hobbies/drawings/IMG_5110.jpg',
