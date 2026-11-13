@@ -197,7 +197,7 @@ const HOBBIES = {
 /* Home: "Or else..." steps through these, in order, one per click.
    Clicking the last one turns it into a player for SONG (Hindi and
    Urdu versions live in lang.js). */
-const OR_ELSE = ['Or else...', 'buddy you don’t wanna find out', 'Grrrrrrrrrrr', 'jk hehe'];
+const OR_ELSE = ['Or else...', 'buddy you don’t wanna find out', 'Hit the road dude', 'jk hehe'];
 const SONG = {
     title: 'Can We Talk', artist: 'Tevin Campbell',
     preview: 'https://p.scdn.co/mp3-preview/06750f88f19c0113787d2e6715484225e52d0a9e', // Spotify's 30s preview
